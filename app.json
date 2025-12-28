@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "Squad Game",
+    "slug": "squad-game",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#1a1a2e"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.squadgame.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Squad Game needs camera access for live selfie events",
+        "NSPhotoLibraryUsageDescription": "Squad Game uses your photo library for profile pictures only"
+      }
+    },
+    "android": {
+      "package": "com.squadgame.app",
+      "permissions": [
+        "CAMERA",
+        "NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Squad Game needs camera access for live selfie events"
+        }
+      ],
+      "expo-localization"
+    ],
+    "scheme": "squadgame",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
