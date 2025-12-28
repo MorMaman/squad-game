@@ -7,7 +7,15 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "eslint . --ext .ts,.tsx"
+    "build": "NODE_ENV=production npx expo export -p web",
+    "build:web": "NODE_ENV=production npx expo export -p web",
+    "build:ios": "NODE_ENV=production eas build --platform ios",
+    "build:android": "NODE_ENV=production eas build --platform android",
+    "preview": "npx serve dist",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "playwright test",
+    "test:games": "playwright test tests/games/",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
@@ -46,6 +54,8 @@
     "@playwright/test": "^1.57.0",
     "@types/react": "~18.2.79",
     "@types/react-native": "~0.73.0",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "serve": "^14.2.5",
     "typescript": "~5.3.3"
   },
   "private": true

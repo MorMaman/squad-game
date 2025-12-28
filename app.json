@@ -27,7 +27,14 @@
       ]
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/icon.png",
+      "name": "Squad Game",
+      "shortName": "Squad Game",
+      "description": "A fun, game-like mobile app with mini-games and challenges",
+      "themeColor": "#0A0E27",
+      "backgroundColor": "#0A0E27"
     },
     "plugins": [
       "expo-router",
