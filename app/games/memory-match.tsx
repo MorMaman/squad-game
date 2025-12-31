@@ -76,14 +76,14 @@ function GameCard({
     });
   }, [card.isFlipped, card.isMatched]);
 
-  const frontStyle = useAnimatedStyle(() => ({
+  const backStyle = useAnimatedStyle(() => ({
     transform: [{ rotateY: `${flipRotation.value}deg` }],
-    opacity: flipRotation.value > 90 ? 1 : 0,
+    opacity: flipRotation.value < 90 ? 1 : 0,
   }));
 
-  const backStyle = useAnimatedStyle(() => ({
+  const frontStyle = useAnimatedStyle(() => ({
     transform: [{ rotateY: `${flipRotation.value - 180}deg` }],
-    opacity: flipRotation.value < 90 ? 1 : 0,
+    opacity: flipRotation.value > 90 ? 1 : 0,
   }));
 
   return (
