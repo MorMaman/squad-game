@@ -13,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -129,11 +129,20 @@ function GameCard({
 
 export default function MemoryMatchGame() {
   const router = useRouter();
+  const navigation = useNavigation();
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [matches, setMatches] = useState(0);
   const [timer, setTimer] = useState(0);
+
+  const handleGoBack = useCallback(() => {
+    if (navigation.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  }, [navigation, router]);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
@@ -261,7 +270,7 @@ export default function MemoryMatchGame() {
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.title}>Memory Match</Text>
@@ -323,7 +332,7 @@ export default function MemoryMatchGame() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.exitButton}
-                  onPress={() => router.back()}
+                  onPress={handleGoBack}
                 >
                   <Text style={styles.exitButtonText}>Exit</Text>
                 </TouchableOpacity>
