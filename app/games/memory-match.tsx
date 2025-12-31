@@ -27,7 +27,13 @@ import Animated, {
   FadeInDown,
 } from 'react-native-reanimated';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Calculate card size based on screen, with min/max bounds for web
+const getCardSize = () => {
+  const baseSize = Math.min(SCREEN_WIDTH, 500) - 64;
+  return Math.max(60, Math.min(100, baseSize / 4));
+};
 
 const COLORS = {
   background: '#0A0E27',
@@ -330,7 +336,7 @@ export default function MemoryMatchGame() {
   );
 }
 
-const CARD_SIZE = (SCREEN_WIDTH - 64) / 4;
+const CARD_SIZE = getCardSize();
 
 const styles = StyleSheet.create({
   container: {
@@ -380,25 +386,38 @@ const styles = StyleSheet.create({
   gridContainer: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 16,
+    paddingVertical: 20,
+    minHeight: 400,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
+    alignItems: 'center',
     gap: 8,
+    maxWidth: 500,
+    width: '100%',
   },
   cardContainer: {
     width: CARD_SIZE,
     height: CARD_SIZE,
+    minWidth: 60,
+    minHeight: 60,
   },
   card: {
     position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     width: '100%',
     height: '100%',
     borderRadius: 12,
     backfaceVisibility: 'hidden',
     overflow: 'hidden',
+    pointerEvents: 'none',
   },
   cardBack: {
     borderWidth: 2,
