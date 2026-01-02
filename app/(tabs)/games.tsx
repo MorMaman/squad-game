@@ -227,15 +227,16 @@ function GameCard({
   return (
     <Animated.View
       entering={FadeInUp.delay(index * 100).duration(500).springify()}
-      style={[styles.cardWrapper, cardStyle]}
+      style={styles.cardWrapper}
     >
-      <TouchableOpacity
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        activeOpacity={1}
-        style={styles.cardTouchable}
-      >
+      <Animated.View style={cardStyle}>
+        <TouchableOpacity
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          activeOpacity={1}
+          style={styles.cardTouchable}
+        >
         {/* Glow Background */}
         <Animated.View
           style={[
@@ -274,6 +275,7 @@ function GameCard({
           </View>
         </LinearGradient>
       </TouchableOpacity>
+      </Animated.View>
     </Animated.View>
   );
 }
