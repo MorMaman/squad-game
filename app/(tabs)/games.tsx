@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Href } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -291,7 +292,7 @@ function GameIcon({
   size: number;
 }) {
   // Map game icon names to valid Ionicons names
-  const iconMap: Record<string, string> = {
+  const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
     brain: 'grid',
     zap: 'flash',
     palette: 'color-palette',
@@ -299,8 +300,6 @@ function GameIcon({
     'musical-notes': 'musical-notes',
   };
 
-  // Use the Ionicons component directly
-  const { Ionicons } = require('@expo/vector-icons');
   const iconName = iconMap[name] || 'game-controller';
 
   return <Ionicons name={iconName} size={size} color={color} />;
