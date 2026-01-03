@@ -1114,31 +1114,7 @@ export default function HomeScreen() {
       {/* Background particles */}
       <BackgroundParticles />
 
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        {/* Player Stats Header */}
-        <PlayerStatsHeader
-          profile={profile}
-          level={userLevel}
-          xp={userXP}
-          xpToNext={xpToNextLevel}
-          streak={userStreak}
-          onPress={() => setShowPlayerCard(true)}
-        />
-
-        {/* Squad Selector */}
-        {squads.length > 1 && (
-          <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-            <TouchableOpacity
-              style={styles.squadSelector}
-              onPress={() => setShowSquadPicker(true)}
-            >
-              <Ionicons name="people" size={16} color={COLORS.TEXT_SECONDARY} />
-              <Text style={styles.squadName}>{currentSquad?.name}</Text>
-              <Ionicons name="chevron-down" size={16} color={COLORS.TEXT_SECONDARY} />
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-
+      <View style={styles.safeArea}>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
@@ -1151,6 +1127,30 @@ export default function HomeScreen() {
             />
           }
         >
+          {/* Player Stats Header */}
+          <PlayerStatsHeader
+            profile={profile}
+            level={userLevel}
+            xp={userXP}
+            xpToNext={xpToNextLevel}
+            streak={userStreak}
+            onPress={() => setShowPlayerCard(true)}
+          />
+
+          {/* Squad Selector */}
+          {squads.length > 1 && (
+            <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+              <TouchableOpacity
+                style={styles.squadSelector}
+                onPress={() => setShowSquadPicker(true)}
+              >
+                <Ionicons name="people" size={16} color={COLORS.TEXT_SECONDARY} />
+                <Text style={styles.squadName}>{currentSquad?.name}</Text>
+                <Ionicons name="chevron-down" size={16} color={COLORS.TEXT_SECONDARY} />
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+
           {/* Section: Daily Challenge */}
           <View style={styles.section}>
             <Animated.Text
@@ -1354,7 +1354,7 @@ export default function HomeScreen() {
           streak={userStreak}
           rank={userRank}
         />
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

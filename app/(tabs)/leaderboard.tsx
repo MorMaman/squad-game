@@ -629,7 +629,7 @@ export default function LeaderboardScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={rest}
@@ -666,7 +666,7 @@ export default function LeaderboardScreen() {
           </LinearGradient>
         </Pressable>
       </Animated.View>
-    </SafeAreaView>
+    </View>
   );
 }
 

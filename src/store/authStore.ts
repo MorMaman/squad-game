@@ -20,6 +20,7 @@ interface AuthState {
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
   fetchProfile: () => Promise<void>;
+  clearError: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -34,47 +35,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
 
     try {
-      // Set a timeout to ensure initialization completes
-      const timeoutPromise = new Promise<void>((resolve) => {
-        setTimeout(() => {
-          console.log('Auth initialization timeout - continuing without session');
-          resolve();
-        }, 5000);
-      });
+      // First, get existing session
+      const { data: { session }, error } = await supabase.auth.getSession();
 
-      const authPromise = (async () => {
-        try {
-          const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Auth session error:', error.message);
+        set({ error: error.message });
+      } else if (session?.user) {
+        set({ session, user: session.user });
+        await get().fetchProfile();
+      }
 
-          if (error) {
-            console.error('Auth session error:', error.message);
-            set({ error: error.message });
-            return;
-          }
-
-          if (session?.user) {
-            set({ session, user: session.user });
-            await get().fetchProfile();
-          }
-
-          // Listen for auth changes
-          const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('Auth state changed:', event);
-            set({ session, user: session?.user ?? null });
-            if (session?.user) {
-              await get().fetchProfile();
-            } else {
-              set({ profile: null });
-            }
-          });
-        } catch (error) {
-          console.error('Auth initialization error:', error);
-          set({ error: (error as Error).message });
+      // Set up auth state listener (this will catch all future auth changes)
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth state changed:', event);
+        set({ session, user: session?.user ?? null });
+        if (session?.user) {
+          await get().fetchProfile();
+        } else {
+          set({ profile: null });
         }
-      })();
-
-      // Race between auth and timeout
-      await Promise.race([authPromise, timeoutPromise]);
+      });
 
     } catch (error) {
       console.error('Auth initialization error:', error);
@@ -97,6 +78,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       if (data.user) {
         set({ user: data.user, session: data.session });
+        // Fetch profile immediately after signup
+        await get().fetchProfile();
       }
       return { error: null };
     } catch (error) {
@@ -121,6 +104,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       if (data.user) {
         set({ user: data.user, session: data.session });
+        // Fetch profile immediately after login
+        await get().fetchProfile();
       }
       return { error: null };
     } catch (error) {
@@ -234,5 +219,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
+  },
+
+  clearError: () => {
+    set({ error: null });
   },
 }));

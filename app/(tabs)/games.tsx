@@ -497,7 +497,7 @@ export default function GamesScreen() {
       {/* Background particles */}
       <BackgroundParticles />
 
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <View style={styles.safeArea}>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
@@ -553,7 +553,7 @@ export default function GamesScreen() {
           {/* Bottom padding */}
           <View style={{ height: 32 }} />
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

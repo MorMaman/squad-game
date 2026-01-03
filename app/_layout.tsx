@@ -63,7 +63,9 @@ function RootLayoutInner() {
     return () => subscription.remove();
   }, [user, router]);
 
-  if (!isInitialized || isLoading) {
+  // Only show loading during initial auth check, NOT during login/signup
+  // (login screen has its own loading state via Button component)
+  if (!isInitialized) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color="#6366f1" />
@@ -150,6 +152,7 @@ function RootLayoutInner() {
         />
         <Stack.Screen name="results/[eventId]" options={{ title: 'Results' }} />
         <Stack.Screen name="judge" options={{ title: 'Judge Panel' }} />
+        <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
       </Stack>
     </>
   );

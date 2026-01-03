@@ -58,7 +58,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
         {/* Profile Section */}
         <Card style={styles.profileCard}>
@@ -169,7 +169,7 @@ export default function SettingsScreen() {
 
         <Text style={styles.version}>Version 1.0.0</Text>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

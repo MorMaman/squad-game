@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,41 +16,68 @@ import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
 import { useAuthStore } from '../../src/store/authStore';
 
+// Convert Supabase errors to user-friendly messages
+const getErrorMessage = (errorMessage: string): string => {
+  if (errorMessage.includes('Invalid login credentials')) {
+    return 'Invalid email or password. Please check your credentials or sign up for a new account.';
+  }
+  if (errorMessage.includes('Email not confirmed')) {
+    return 'Please check your email and confirm your account before signing in.';
+  }
+  if (errorMessage.includes('User already registered')) {
+    return 'An account with this email already exists. Try signing in instead.';
+  }
+  if (errorMessage.includes('Password should be')) {
+    return 'Password must be at least 6 characters long.';
+  }
+  if (errorMessage.includes('Unable to validate email')) {
+    return 'Please enter a valid email address.';
+  }
+  return errorMessage;
+};
+
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  const [error, setError] = useState('');
-  const { signUp, signIn, isLoading } = useAuthStore();
+  const [localError, setLocalError] = useState('');
+  const { signUp, signIn, isLoading, error: authError, clearError } = useAuthStore();
   const router = useRouter();
+
+  // Use auth store error if available (converted to user-friendly), otherwise use local validation error
+  const error = authError ? getErrorMessage(authError) : localError;
+
+  // Clear errors when component mounts or when switching between sign in/sign up
+  const clearErrors = () => {
+    setLocalError('');
+    clearError();
+  };
 
   const handleSubmit = async () => {
     if (!email.trim() || !email.includes('@')) {
-      setError('Please enter a valid email');
+      setLocalError('Please enter a valid email');
       return;
     }
 
     if (!password.trim() || password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setLocalError('Password must be at least 6 characters');
       return;
     }
 
-    setError('');
+    clearErrors();
 
     if (isSignUp) {
-      const { error } = await signUp(email.trim(), password);
-      if (error) {
-        setError(error.message);
-      } else {
+      const { error: signUpError } = await signUp(email.trim(), password);
+      if (!signUpError) {
         router.replace('/');
       }
+      // Error is already set in authStore, no need to set it here
     } else {
-      const { error } = await signIn(email.trim(), password);
-      if (error) {
-        setError(error.message);
-      } else {
+      const { error: signInError } = await signIn(email.trim(), password);
+      if (!signInError) {
         router.replace('/');
       }
+      // Error is already set in authStore, no need to set it here
     }
   };
 
@@ -71,11 +98,20 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.form}>
+          {error ? (
+            <View style={styles.errorBanner}>
+              <Ionicons name="alert-circle" size={20} color="#ef4444" />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
           <Input
             label="Email"
             placeholder="you@example.com"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => {
+              setEmail(text);
+              clearErrors();
+            }}
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
@@ -84,10 +120,12 @@ export default function LoginScreen() {
             label="Password"
             placeholder="Enter your password"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              clearErrors();
+            }}
             secureTextEntry
             autoCapitalize="none"
-            error={error}
           />
           <Button
             title={isSignUp ? 'Sign Up' : 'Sign In'}
@@ -99,7 +137,7 @@ export default function LoginScreen() {
             style={styles.switchButton}
             onPress={() => {
               setIsSignUp(!isSignUp);
-              setError('');
+              clearErrors();
             }}
           >
             <Text style={styles.switchText}>
@@ -161,6 +199,22 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 16,
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderRadius: 12,
+    padding: 12,
+    gap: 10,
+  },
+  errorText: {
+    flex: 1,
+    color: '#ef4444',
+    fontSize: 14,
+    lineHeight: 20,
   },
   switchButton: {
     alignItems: 'center',
