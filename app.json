@@ -17,6 +17,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.squadgame.app",
+      "icon": "./assets/icon.png",
       "infoPlist": {
         "NSCameraUsageDescription": "Squad Game needs camera access for live selfie events",
         "NSPhotoLibraryUsageDescription": "Squad Game uses your photo library for profile pictures only"
@@ -24,6 +25,10 @@
     },
     "android": {
       "package": "com.squadgame.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0E27"
+      },
       "permissions": [
         "CAMERA",
         "NOTIFICATIONS"
@@ -32,7 +37,7 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/icon.png",
+      "favicon": "./assets/favicon.png",
       "name": "Squad Game",
       "shortName": "Squad Game",
       "description": "A fun, game-like mobile app with mini-games and challenges",

@@ -13,9 +13,11 @@ export const resources = {
 
 // Get the device locale
 const getDeviceLanguage = (): 'en' | 'he' => {
-  const deviceLocale = Localization.locale;
-  // Check if device language starts with 'he' (Hebrew)
-  if (deviceLocale.startsWith('he')) {
+  // SDK 54 uses getLocales() instead of locale
+  const locales = Localization.getLocales();
+  const deviceLocale = locales?.[0]?.languageCode || 'en';
+  // Check if device language is Hebrew
+  if (deviceLocale === 'he' || deviceLocale.startsWith('he')) {
     return 'he';
   }
   // Default to English

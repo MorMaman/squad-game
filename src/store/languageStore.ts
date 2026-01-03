@@ -18,8 +18,10 @@ interface LanguageState {
 
 // Get device's default language
 const getDeviceLanguage = (): SupportedLanguage => {
-  const deviceLocale = Localization.locale;
-  if (deviceLocale.startsWith('he')) {
+  // SDK 54 uses getLocales() instead of locale
+  const locales = Localization.getLocales();
+  const deviceLocale = locales?.[0]?.languageCode || 'en';
+  if (deviceLocale === 'he' || deviceLocale.startsWith('he')) {
     return 'he';
   }
   return 'en';
