@@ -9,6 +9,9 @@ export { PlayerCard } from './PlayerCard';
 export { StreakBadge } from './StreakBadge';
 export { XPBar } from './XPBar';
 
+// Language Selector Component
+export { LanguageSelector } from './LanguageSelector';
+
 // Underdog Power Components
 export { UnderdogPowerBadge } from './UnderdogPowerBadge';
 export {

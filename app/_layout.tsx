@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform, I18nManager } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../src/lib/i18n';
 import { queryClient } from '../src/lib/queryClient';
 import { useAuthStore } from '../src/store/authStore';
+import { useLanguageStore } from '../src/store/languageStore';
 import { supabase } from '../src/lib/supabase';
 import {
   registerForPushNotificationsAsync,
@@ -13,10 +16,19 @@ import {
   addNotificationResponseReceivedListener,
 } from '../src/services/notifications';
 import { useRouter, Href } from 'expo-router';
+import { RTLProvider } from '../src/providers/RTLProvider';
+import { useRTL } from '../src/utils/rtl';
 
 function RootLayoutInner() {
   const { isLoading, isInitialized, initialize, user } = useAuthStore();
+  const { initializeLanguage, isInitialized: isLanguageInitialized } = useLanguageStore();
   const router = useRouter();
+  const { isRTL } = useRTL();
+
+  useEffect(() => {
+    // Initialize language settings
+    initializeLanguage();
+  }, []);
 
   useEffect(() => {
     // On web, check for auth tokens in URL hash (from magic link redirect)
@@ -73,6 +85,10 @@ function RootLayoutInner() {
     );
   }
 
+  // Determine animation direction based on RTL
+  // In RTL mode, slide_from_right should visually appear as slide_from_left
+  const slideAnimation = isRTL ? 'slide_from_left' : 'slide_from_right';
+
   return (
     <>
       <StatusBar style="light" />
@@ -88,7 +104,11 @@ function RootLayoutInner() {
           contentStyle: {
             backgroundColor: '#111827',
           },
-          animation: 'slide_from_right',
+          animation: slideAnimation,
+          // Ensure proper RTL layout for headers
+          headerTitleAlign: 'center',
+          // Flip back button in RTL mode
+          headerBackTitleVisible: false,
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -160,11 +180,15 @@ function RootLayoutInner() {
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <RootLayoutInner />
-      </QueryClientProvider>
-    </SafeAreaProvider>
+    <RTLProvider>
+      <I18nextProvider i18n={i18n}>
+        <SafeAreaProvider>
+          <QueryClientProvider client={queryClient}>
+            <RootLayoutInner />
+          </QueryClientProvider>
+        </SafeAreaProvider>
+      </I18nextProvider>
+    </RTLProvider>
   );
 }
 

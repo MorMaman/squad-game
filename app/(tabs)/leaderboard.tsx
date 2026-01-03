@@ -26,6 +26,7 @@ import Animated, {
   FadeIn,
   FadeInDown,
   SlideInRight,
+  SlideInLeft,
 } from 'react-native-reanimated';
 import { Avatar } from '../../src/components/Avatar';
 import {
@@ -33,6 +34,9 @@ import {
   PowerIndicator,
   RivalryBadge,
 } from '../../src/components';
+import { RTLView, RTLIcon } from '../../src/components/RTLView';
+import { useTranslation } from 'react-i18next';
+import { useRTL } from '../../src/utils/rtl';
 import { useSquadStore } from '../../src/store/squadStore';
 import { useAuthStore } from '../../src/store/authStore';
 import { usePowerStore } from '../../src/store/powerStore';
@@ -222,7 +226,7 @@ const PodiumPlace = ({
       </Animated.View>
 
       {/* Status Indicators Row */}
-      <View style={styles.podiumIndicators}>
+      <RTLView row style={styles.podiumIndicators}>
         {powerType && (
           <PowerIndicator powerType={powerType as any} size="small" />
         )}
@@ -237,7 +241,7 @@ const PodiumPlace = ({
             <Ionicons name="flash" size={12} color="#FF6B00" />
           </View>
         )}
-      </View>
+      </RTLView>
 
       <Text style={styles.podiumName} numberOfLines={1}>
         {entry.profile?.display_name}
@@ -285,6 +289,8 @@ const LeaderboardRow = ({
 }) => {
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0.5);
+  const { isRTL } = useRTL();
+  const { t } = useTranslation();
 
   const rankChange = previousRank ? previousRank - rank : 0;
   const points = activeTab === 'weekly' ? entry.points_weekly : entry.streak_count;
@@ -319,9 +325,14 @@ const LeaderboardRow = ({
     shadowOpacity: glowOpacity.value,
   }));
 
+  // Use RTL-aware slide animation
+  const enteringAnimation = isRTL
+    ? SlideInLeft.delay(rank * 50).springify().damping(15)
+    : SlideInRight.delay(rank * 50).springify().damping(15);
+
   return (
     <Animated.View
-      entering={SlideInRight.delay(rank * 50).springify().damping(15)}
+      entering={enteringAnimation}
       style={animatedStyle}
     >
       <AnimatedPressable
@@ -335,87 +346,97 @@ const LeaderboardRow = ({
           rank <= 10 && styles.topTenRow,
         ]}
       >
-        <View style={styles.rankContainer}>
-          <Text style={[styles.rankNumber, rank <= 10 && styles.topTenRank]}>
-            {rank}
-          </Text>
-        </View>
+        {/* RTL-aware row layout: Rank | Avatar | Info | Score */}
+        <RTLView row style={styles.leaderboardRowContent}>
+          <View style={styles.rankContainer}>
+            <Text style={[styles.rankNumber, rank <= 10 && styles.topTenRank]}>
+              {rank}
+            </Text>
+          </View>
 
-        <View style={[styles.rowAvatarWrapper, hasCrown && styles.crownHolderRowAvatar]}>
-          {hasCrown ? (
-            <CrownOverlay size="small">
+          <View style={[styles.rowAvatarWrapper, hasCrown && styles.crownHolderRowAvatar]}>
+            {hasCrown ? (
+              <CrownOverlay size="small">
+                <Avatar
+                  uri={entry.profile?.avatar_url}
+                  name={entry.profile?.display_name}
+                  size="small"
+                />
+              </CrownOverlay>
+            ) : (
               <Avatar
                 uri={entry.profile?.avatar_url}
                 name={entry.profile?.display_name}
                 size="small"
               />
-            </CrownOverlay>
-          ) : (
-            <Avatar
-              uri={entry.profile?.avatar_url}
-              name={entry.profile?.display_name}
-              size="small"
-            />
-          )}
-        </View>
-
-        <View style={styles.playerInfo}>
-          <View style={styles.playerNameRow}>
-            <Text style={styles.playerName} numberOfLines={1}>
-              {entry.profile?.display_name}
-              {isCurrentUser && (
-                <Text style={styles.youBadge}> (You)</Text>
-              )}
-            </Text>
-          </View>
-          {/* Status indicators */}
-          <View style={styles.rowIndicators}>
-            {powerType && (
-              <PowerIndicator powerType={powerType as any} size="tiny" />
-            )}
-            {isTargeted && (
-              <View style={styles.targetIndicatorSmall}>
-                <Ionicons name="locate" size={10} color={COLORS.CORAL} />
-              </View>
-            )}
-            {hasRivalry && <RivalryBadge size="tiny" />}
-            {isLastPlace && (
-              <View style={styles.underdogIndicatorSmall}>
-                <Ionicons name="flash" size={10} color="#FF6B00" />
-              </View>
-            )}
-            {entry.strikes_14d > 0 && (
-              <View style={styles.strikesBadge}>
-                <Ionicons name="warning" size={10} color={COLORS.CORAL} />
-                <Text style={styles.strikesText}>{entry.strikes_14d}</Text>
-              </View>
             )}
           </View>
-        </View>
 
-        <View style={styles.scoreContainer}>
-          <Text style={styles.playerScore}>
-            {points?.toLocaleString()}
-          </Text>
-          {rankChange !== 0 && (
-            <View style={[
-              styles.rankChange,
-              rankChange > 0 ? styles.rankUp : styles.rankDown,
-            ]}>
-              <Ionicons
-                name={rankChange > 0 ? 'arrow-up' : 'arrow-down'}
-                size={10}
-                color={rankChange > 0 ? COLORS.NEON_GREEN : COLORS.CORAL}
-              />
+          <View style={styles.playerInfo}>
+            <RTLView row style={styles.playerNameRow}>
               <Text style={[
-                styles.rankChangeText,
-                { color: rankChange > 0 ? COLORS.NEON_GREEN : COLORS.CORAL },
-              ]}>
-                {Math.abs(rankChange)}
+                styles.playerName,
+                isRTL && styles.playerNameRTL
+              ]} numberOfLines={1}>
+                {entry.profile?.display_name}
+                {isCurrentUser && (
+                  <Text style={styles.youBadge}> (You)</Text>
+                )}
               </Text>
-            </View>
-          )}
-        </View>
+            </RTLView>
+            {/* Status indicators */}
+            <RTLView row style={styles.rowIndicators}>
+              {powerType && (
+                <PowerIndicator powerType={powerType as any} size="tiny" />
+              )}
+              {isTargeted && (
+                <View style={styles.targetIndicatorSmall}>
+                  <Ionicons name="locate" size={10} color={COLORS.CORAL} />
+                </View>
+              )}
+              {hasRivalry && <RivalryBadge size="tiny" />}
+              {isLastPlace && (
+                <View style={styles.underdogIndicatorSmall}>
+                  <Ionicons name="flash" size={10} color="#FF6B00" />
+                </View>
+              )}
+              {entry.strikes_14d > 0 && (
+                <RTLView row style={styles.strikesBadge}>
+                  <Ionicons name="warning" size={10} color={COLORS.CORAL} />
+                  <Text style={styles.strikesText}>{entry.strikes_14d}</Text>
+                </RTLView>
+              )}
+            </RTLView>
+          </View>
+
+          <View style={[
+            styles.scoreContainer,
+            isRTL && styles.scoreContainerRTL
+          ]}>
+            <Text style={styles.playerScore}>
+              {points?.toLocaleString()}
+            </Text>
+            {rankChange !== 0 && (
+              <RTLView row style={[
+                styles.rankChange,
+                rankChange > 0 ? styles.rankUp : styles.rankDown,
+              ]}>
+                <RTLIcon
+                  name={rankChange > 0 ? 'arrow-up' : 'arrow-down'}
+                  size={10}
+                  color={rankChange > 0 ? COLORS.NEON_GREEN : COLORS.CORAL}
+                  noFlip
+                />
+                <Text style={[
+                  styles.rankChangeText,
+                  { color: rankChange > 0 ? COLORS.NEON_GREEN : COLORS.CORAL },
+                ]}>
+                  {Math.abs(rankChange)}
+                </Text>
+              </RTLView>
+            )}
+          </View>
+        </RTLView>
       </AnimatedPressable>
     </Animated.View>
   );
@@ -456,6 +477,8 @@ export default function LeaderboardScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showJumpButton, setShowJumpButton] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const { isRTL } = useRTL();
+  const { t } = useTranslation();
 
   const { currentSquad } = useSquadStore();
   const { user } = useAuthStore();
@@ -467,10 +490,10 @@ export default function LeaderboardScreen() {
   const headerGlow = useSharedValue(0.3);
 
   const timeframes: { label: string; value: TimeFrame }[] = [
-    { label: 'Today', value: 'today' },
-    { label: 'Week', value: 'week' },
-    { label: 'Month', value: 'month' },
-    { label: 'All-Time', value: 'all' },
+    { label: t('leaderboard.today'), value: 'today' },
+    { label: t('leaderboard.week'), value: 'week' },
+    { label: t('leaderboard.month'), value: 'month' },
+    { label: t('leaderboard.allTime'), value: 'all' },
   ];
 
   const currentUserRank = stats.findIndex((s) => s.user_id === user?.id) + 1;
@@ -553,7 +576,9 @@ export default function LeaderboardScreen() {
 
   const handleTimeframeChange = (value: TimeFrame) => {
     const index = timeframes.findIndex((t) => t.value === value);
-    indicatorPosition.value = withSpring(index, { damping: 15, stiffness: 150 });
+    // For RTL, reverse the indicator position
+    const position = isRTL ? (timeframes.length - 1 - index) : index;
+    indicatorPosition.value = withSpring(position, { damping: 15, stiffness: 150 });
     setTimeframe(value);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
@@ -632,7 +657,7 @@ export default function LeaderboardScreen() {
         style={styles.headerGradient}
       >
         <Animated.View style={[styles.yourRankContainer, headerAnimatedStyle, headerGlowStyle]}>
-          <Text style={styles.yourRankLabel}>YOUR RANK</Text>
+          <Text style={styles.yourRankLabel}>{t('leaderboard.yourRank').toUpperCase()}</Text>
           <View style={styles.rankBadge}>
             <Text style={styles.rankBadgeNumber}>
               #{currentUserRank || '-'}
@@ -659,9 +684,13 @@ export default function LeaderboardScreen() {
         </Animated.View>
       </LinearGradient>
 
-      {/* Timeframe Selector */}
-      <View style={styles.timeframeContainer}>
-        <Animated.View style={[styles.timeframeIndicator, indicatorStyle]}>
+      {/* Timeframe Selector - RTL-aware */}
+      <RTLView row style={styles.timeframeContainer}>
+        <Animated.View style={[
+          styles.timeframeIndicator,
+          indicatorStyle,
+          isRTL && styles.timeframeIndicatorRTL
+        ]}>
           <LinearGradient
             colors={[COLORS.PURPLE, COLORS.CYAN]}
             start={{ x: 0, y: 0 }}
@@ -679,7 +708,7 @@ export default function LeaderboardScreen() {
             indicatorPosition={indicatorPosition}
           />
         ))}
-      </View>
+      </RTLView>
 
       {/* Top 3 Podium */}
       {top3.length > 0 && (
@@ -723,8 +752,8 @@ export default function LeaderboardScreen() {
         </Animated.View>
       )}
 
-      {/* Tab Selector */}
-      <View style={styles.tabSelector}>
+      {/* Tab Selector - RTL-aware */}
+      <RTLView row style={styles.tabSelector}>
         <Pressable
           style={[styles.tabButton, activeTab === 'weekly' && styles.tabButtonActive]}
           onPress={() => handleTabChange('weekly')}
@@ -735,7 +764,7 @@ export default function LeaderboardScreen() {
             color={activeTab === 'weekly' ? COLORS.CYAN : COLORS.ICE_WHITE}
           />
           <Text style={[styles.tabButtonText, activeTab === 'weekly' && styles.tabButtonTextActive]}>
-            Weekly
+            {t('leaderboard.weekly')}
           </Text>
         </Pressable>
         <Pressable
@@ -748,19 +777,19 @@ export default function LeaderboardScreen() {
             color={activeTab === 'streaks' ? COLORS.ORANGE : COLORS.ICE_WHITE}
           />
           <Text style={[styles.tabButtonText, activeTab === 'streaks' && styles.tabButtonTextActive]}>
-            Streaks
+            {t('leaderboard.streaks')}
           </Text>
         </Pressable>
-      </View>
+      </RTLView>
     </>
   );
 
   const EmptyState = () => (
     <View style={styles.emptyState}>
       <Ionicons name="trophy-outline" size={64} color={COLORS.PURPLE} />
-      <Text style={styles.emptyTitle}>No standings yet</Text>
+      <Text style={styles.emptyTitle}>{t('leaderboard.noStandingsYet')}</Text>
       <Text style={styles.emptySubtitle}>
-        Complete events to appear on the leaderboard
+        {t('leaderboard.completeEventsToAppear')}
       </Text>
     </View>
   );
@@ -799,7 +828,7 @@ export default function LeaderboardScreen() {
             style={styles.jumpButtonGradient}
           >
             <Ionicons name="locate" size={20} color={COLORS.ICE_WHITE} />
-            <Text style={styles.jumpButtonText}>Your Position</Text>
+            <Text style={styles.jumpButtonText}>{t('leaderboard.yourPosition')}</Text>
           </LinearGradient>
         </Pressable>
       </Animated.View>
@@ -878,7 +907,6 @@ const styles = StyleSheet.create({
 
   // Timeframe Selector
   timeframeContainer: {
-    flexDirection: 'row',
     marginHorizontal: 16,
     marginTop: -15,
     backgroundColor: COLORS.MIDNIGHT_BLUE,
@@ -909,6 +937,10 @@ const styles = StyleSheet.create({
     left: 4,
     top: 4,
     bottom: 4,
+  },
+  timeframeIndicatorRTL: {
+    left: undefined,
+    right: 4,
   },
   indicatorGradient: {
     flex: 1,
@@ -956,7 +988,6 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   podiumIndicators: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     marginBottom: 4,
@@ -1023,7 +1054,6 @@ const styles = StyleSheet.create({
 
   // Tab Selector
   tabSelector: {
-    flexDirection: 'row',
     marginHorizontal: 16,
     marginVertical: 16,
     gap: 12,
@@ -1056,8 +1086,6 @@ const styles = StyleSheet.create({
 
   // Leaderboard Row
   leaderboardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginHorizontal: 16,
     marginBottom: 8,
     backgroundColor: COLORS.MIDNIGHT_BLUE,
@@ -1065,6 +1093,9 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     borderColor: 'transparent',
+  },
+  leaderboardRowContent: {
+    alignItems: 'center',
   },
   currentUserRow: {
     borderColor: COLORS.PURPLE,
@@ -1093,6 +1124,7 @@ const styles = StyleSheet.create({
   },
   rowAvatarWrapper: {
     position: 'relative',
+    marginHorizontal: 8,
   },
   crownHolderRowAvatar: {
     shadowColor: COLORS.GOLD,
@@ -1103,10 +1135,8 @@ const styles = StyleSheet.create({
   },
   playerInfo: {
     flex: 1,
-    marginLeft: 12,
   },
   playerNameRow: {
-    flexDirection: 'row',
     alignItems: 'center',
   },
   playerName: {
@@ -1114,12 +1144,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.ICE_WHITE,
   },
+  playerNameRTL: {
+    textAlign: 'right',
+  },
   youBadge: {
     color: COLORS.PURPLE,
     fontWeight: '500',
   },
   rowIndicators: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     marginTop: 4,
@@ -1141,7 +1173,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   strikesBadge: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
     marginTop: 2,
@@ -1154,13 +1185,15 @@ const styles = StyleSheet.create({
   scoreContainer: {
     alignItems: 'flex-end',
   },
+  scoreContainerRTL: {
+    alignItems: 'flex-start',
+  },
   playerScore: {
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.CYAN,
   },
   rankChange: {
-    flexDirection: 'row',
     alignItems: 'center',
     marginTop: 2,
     paddingHorizontal: 6,

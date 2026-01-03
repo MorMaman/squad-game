@@ -2,6 +2,7 @@
  * UnderdogPowerBadge.tsx
  * Shows active underdog power with countdown timer and pulsing glow animation
  * Displays icon based on power type with red/orange gradient background
+ * Supports RTL layout for Hebrew language
  */
 
 import React, { useEffect, useState } from 'react';
@@ -20,6 +21,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../theme/colors';
 import { GAME_COLORS, GAME_SPRINGS } from '../theme/gameColors';
+import { useRTL, flipStyle } from '../utils/rtl';
+import { RTLView, RTLIcon } from './RTLView';
 
 // Underdog power types
 export type UnderdogPowerType = 'double_chance' | 'target_lock' | 'chaos_card' | 'streak_shield';
@@ -71,6 +74,7 @@ export function UnderdogPowerBadge({
 }: UnderdogPowerBadgeProps) {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const config = POWER_CONFIG[powerType];
+  const { isRTL } = useRTL();
 
   // Animation values
   const glowPulse = useSharedValue(0);
@@ -194,7 +198,7 @@ export function UnderdogPowerBadge({
         {/* Animated glow overlay */}
         <Animated.View style={[styles.glowOverlay, animatedGlowStyle]} />
 
-        <View style={styles.content}>
+        <RTLView row style={styles.content}>
           {/* Power Icon */}
           <Animated.View style={[styles.iconContainer, animatedIconStyle]}>
             <View style={styles.iconBackground}>
@@ -209,25 +213,31 @@ export function UnderdogPowerBadge({
           {/* Power Info */}
           <View style={styles.infoContainer}>
             {showLabel && (
-              <Text style={styles.activeLabel}>UNDERDOG ACTIVE</Text>
+              <Text style={[
+                styles.activeLabel,
+                isRTL && styles.textRTL
+              ]}>UNDERDOG ACTIVE</Text>
             )}
-            <Text style={styles.powerName}>{config.label}</Text>
-            <View style={styles.timerContainer}>
+            <Text style={[
+              styles.powerName,
+              isRTL && styles.textRTL
+            ]}>{config.label}</Text>
+            <RTLView row style={styles.timerContainer}>
               <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
               <Text style={styles.timerText}>{formatTimeLeft()}</Text>
-            </View>
+            </RTLView>
           </View>
 
-          {/* Chevron if pressable */}
+          {/* Chevron if pressable - flip icon for RTL */}
           {onPress && (
-            <Ionicons
+            <RTLIcon
               name="chevron-forward"
               size={20}
               color={colors.textSecondary}
-              style={styles.chevron}
+              style={isRTL ? styles.chevronRTL : styles.chevron}
             />
           )}
-        </View>
+        </RTLView>
       </LinearGradient>
     </Animated.View>
   );
@@ -263,7 +273,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
   },
   content: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
   },
@@ -297,8 +306,10 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: 4,
   },
+  textRTL: {
+    textAlign: 'right',
+  },
   timerContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
   },
@@ -310,6 +321,9 @@ const styles = StyleSheet.create({
   },
   chevron: {
     marginLeft: spacing.sm,
+  },
+  chevronRTL: {
+    marginRight: spacing.sm,
   },
 });
 
