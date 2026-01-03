@@ -218,3 +218,9 @@ export const XP_REWARDS: Record<string, XPReward> = {
   INVITE_FRIEND: { action: 'invite_friend', amount: 100, description: 'Invite friend who joins' },
   EARN_BADGE: { action: 'earn_badge', amount: 25, description: 'Earn a new badge' },
 };
+
+// Re-export power types
+export * from './powers';
+
+// Re-export crown types
+export * from './crown';

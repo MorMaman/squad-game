@@ -93,6 +93,44 @@ async function awardPointsForSubmissions(event: Event): Promise<void> {
   }
 }
 
+async function awardUnderdogPower(eventId: string): Promise<string | null> {
+  // Award a random underdog power to the last place finisher
+  const { data, error } = await supabase.rpc("award_underdog_power", {
+    p_event_id: eventId,
+  });
+
+  if (error) {
+    console.error("Error awarding underdog power:", error);
+    return null;
+  }
+
+  if (data) {
+    console.log(`Awarded ${data} power to last place finisher in event ${eventId}`);
+  }
+
+  return data;
+}
+
+async function awardCrown(eventId: string): Promise<string | null> {
+  // Award a crown to the first place finisher
+  const { data, error } = await supabase.rpc("award_crown", {
+    p_event_id: eventId,
+  });
+
+  if (error) {
+    console.error("Error awarding crown:", error);
+    return null;
+  }
+
+  if (data) {
+    console.log(`Awarded crown to user ${data} for winning event ${eventId}`);
+  } else {
+    console.log(`No crown awarded for event ${eventId} (no rank 1 participant)`);
+  }
+
+  return data;
+}
+
 Deno.serve(async (req: Request) => {
   try {
     // Verify this is a cron job or authorized request
@@ -124,10 +162,19 @@ Deno.serve(async (req: Request) => {
     }
 
     // Process each event
+    const underdogPowers: { eventId: string; power: string }[] = [];
+    const crowns: { eventId: string; userId: string }[] = [];
+
     for (const event of events as Event[]) {
       // Calculate ranks for PRESSURE_TAP events
       if (event.event_type === "PRESSURE_TAP") {
         await calculateRanksForEvent(event.id);
+      }
+
+      // Award crown to first place finisher (after ranks are calculated)
+      const crownedUserId = await awardCrown(event.id);
+      if (crownedUserId) {
+        crowns.push({ eventId: event.id, userId: crownedUserId });
       }
 
       // Award points for all submissions
@@ -135,6 +182,12 @@ Deno.serve(async (req: Request) => {
 
       // Apply missed penalties
       await applyMissedPenalties(event);
+
+      // Award underdog power to last place finisher
+      const awardedPower = await awardUnderdogPower(event.id);
+      if (awardedPower) {
+        underdogPowers.push({ eventId: event.id, power: awardedPower });
+      }
     }
 
     // Update events to closed status
@@ -152,6 +205,8 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({
         message: `Closed ${events.length} events`,
         eventIds,
+        crowns,
+        underdogPowers,
         timestamp: now,
       }),
       { headers: { "Content-Type": "application/json" } }

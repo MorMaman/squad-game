@@ -7,6 +7,7 @@ interface SquadState {
   squads: Squad[];
   members: SquadMember[];
   isLoading: boolean;
+  isInitialized: boolean;
 
   // Actions
   fetchSquads: () => Promise<void>;
@@ -31,6 +32,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
   squads: [],
   members: [],
   isLoading: false,
+  isInitialized: false,
 
   fetchSquads: async () => {
     set({ isLoading: true });
@@ -60,7 +62,7 @@ export const useSquadStore = create<SquadState>((set, get) => ({
     } catch (error) {
       console.error('Error fetching squads:', error);
     } finally {
-      set({ isLoading: false });
+      set({ isLoading: false, isInitialized: true });
     }
   },
 
@@ -95,22 +97,54 @@ export const useSquadStore = create<SquadState>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return { squad: null, error: new Error('Not authenticated') };
 
-      const inviteCode = generateInviteCode();
+      // Retry logic for invite code collisions (max 5 attempts)
+      const MAX_RETRIES = 5;
+      let squad = null;
+      let squadError = null;
 
-      // Create the squad
-      const { data: squad, error: squadError } = await supabase
-        .from('squads')
-        .insert({
-          name,
-          invite_code: inviteCode,
-          timezone,
-          created_by: user.id,
-        })
-        .select()
-        .single();
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        const inviteCode = generateInviteCode();
+
+        const { data, error } = await supabase
+          .from('squads')
+          .insert({
+            name,
+            invite_code: inviteCode,
+            timezone,
+            created_by: user.id,
+          })
+          .select()
+          .single();
+
+        if (!error) {
+          squad = data;
+          squadError = null;
+          break;
+        }
+
+        // Check if error is due to invite code collision (unique constraint violation)
+        if (error.code === '23505' && error.message?.includes('invite_code')) {
+          // Retry with a new invite code
+          console.log(`Invite code collision, retrying... (attempt ${attempt + 1}/${MAX_RETRIES})`);
+          continue;
+        }
+
+        // Check if error is due to duplicate squad name
+        if (error.code === '23505' && error.message?.includes('idx_squads_name_unique_ci')) {
+          return { squad: null, error: new Error('A squad with this name already exists') };
+        }
+
+        // Different error, don't retry
+        squadError = error;
+        break;
+      }
 
       if (squadError) {
         return { squad: null, error: squadError as Error };
+      }
+
+      if (!squad) {
+        return { squad: null, error: new Error('Failed to create squad after multiple attempts') };
       }
 
       // Add creator as admin

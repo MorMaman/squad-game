@@ -32,11 +32,26 @@ import Animated, {
   SlideInRight,
 } from 'react-native-reanimated';
 import { Avatar } from '../../src/components/Avatar';
+import { SquadStatusBanner, SquadIndicatorCompact } from '../../src/components/SquadStatusBanner';
+import {
+  UnderdogPowerBadge,
+  ChaosCardBanner,
+  CHAOS_RULES,
+  HeadlineBanner,
+  CrownOverlay,
+  CrownBadge,
+  RivalryPanel,
+  HeadlineInputModal,
+  RivalryDeclarationModal,
+} from '../../src/components';
 import { useAuthStore } from '../../src/store/authStore';
 import { useSquadStore } from '../../src/store/squadStore';
 import { useEventStore } from '../../src/store/eventStore';
+import { usePowerStore } from '../../src/store/powerStore';
+import { useCrownStore } from '../../src/store/crownStore';
 import { useRealtimeEvent } from '../../src/hooks/useRealtimeEvent';
 import { EventType } from '../../src/types';
+import { PowerType } from '../../src/types/powers';
 
 // Game Color Palette - Exciting and vibrant
 const COLORS = {
@@ -68,6 +83,9 @@ const COLORS = {
   TEXT_PRIMARY: '#FFFFFF',
   TEXT_SECONDARY: '#A78BFA',
   TEXT_MUTED: '#6B7280',
+
+  // Status colors
+  WARNING_AMBER: '#F59E0B',
 };
 
 // Level titles based on level
@@ -532,17 +550,19 @@ function AnimatedNumber({ value, prefix = '', suffix = '' }: { value: number; pr
   );
 }
 
-// Quick Action Button with bounce
+// Quick Action Button with bounce and optional indicator dot
 function QuickActionButton({
   icon,
   label,
   color,
-  onPress
+  onPress,
+  showIndicator = false,
 }: {
   icon: string;
   label: string;
   color: string;
   onPress: () => void;
+  showIndicator?: boolean;
 }) {
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0.3);
@@ -572,45 +592,144 @@ function QuickActionButton({
       style={styles.quickActionWrapper}
     >
       <Animated.View style={[styles.quickActionButton, { backgroundColor: color }, buttonStyle]}>
-        <Ionicons name={icon as any} size={28} color="#FFFFFF" />
+        <View style={styles.quickActionIconContainer}>
+          <Ionicons name={icon as any} size={28} color="#FFFFFF" />
+          {showIndicator && (
+            <View style={styles.quickActionIndicator}>
+              <View style={styles.quickActionIndicatorDot} />
+            </View>
+          )}
+        </View>
         <Text style={styles.quickActionLabel}>{label}</Text>
       </Animated.View>
     </TouchableOpacity>
   );
 }
 
-// Player Stats Header
+// Underdog Power Glow indicator for header
+function UnderdogPowerGlow() {
+  const glowOpacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    glowOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.7, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.3, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
+  return (
+    <Animated.View style={[styles.underdogGlow, glowStyle]}>
+      <LinearGradient
+        colors={[COLORS.GAME_ORANGE, COLORS.GAME_CORAL]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.underdogGlowGradient}
+      />
+    </Animated.View>
+  );
+}
+
+// Crown Glow indicator for header (golden glow for crown holder)
+function CrownGlow() {
+  const glowOpacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    glowOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.8, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.3, { duration: 1200, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
+  return (
+    <Animated.View style={[styles.crownGlow, glowStyle]}>
+      <LinearGradient
+        colors={[COLORS.GOLD, COLORS.GOLD_GLOW]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.crownGlowGradient}
+      />
+    </Animated.View>
+  );
+}
+
+// Player Stats Header with Squad Indicator
 function PlayerStatsHeader({
   profile,
   level,
   xp,
   xpToNext,
   streak,
-  onPress
+  currentSquad,
+  memberCount,
+  hasActivePower,
+  hasCrown,
+  onPress,
+  onSquadPress,
 }: {
   profile: any;
   level: number;
   xp: number;
   xpToNext: number;
   streak: number;
+  currentSquad: any;
+  memberCount: number;
+  hasActivePower: boolean;
+  hasCrown: boolean;
   onPress: () => void;
+  onSquadPress: () => void;
 }) {
   return (
     <Animated.View entering={FadeInDown.duration(600).springify()}>
       <TouchableOpacity style={styles.playerHeader} onPress={onPress} activeOpacity={0.8}>
         <View style={styles.playerLeft}>
           <View style={styles.avatarWrapper}>
-            <Avatar
-              uri={profile?.avatar_url}
-              name={profile?.display_name}
-              size="medium"
-            />
+            {/* Crown glow behind avatar (takes priority over underdog) */}
+            {hasCrown && <CrownGlow />}
+            {/* Underdog power glow behind avatar (only if not crowned) */}
+            {!hasCrown && hasActivePower && <UnderdogPowerGlow />}
+            {hasCrown ? (
+              <CrownOverlay size="small" position="top-right">
+                <Avatar
+                  uri={profile?.avatar_url}
+                  name={profile?.display_name}
+                  size="medium"
+                />
+              </CrownOverlay>
+            ) : (
+              <Avatar
+                uri={profile?.avatar_url}
+                name={profile?.display_name}
+                size="medium"
+              />
+            )}
             <LinearGradient
-              colors={[COLORS.ELECTRIC_PURPLE, COLORS.PINK_GLOW]}
+              colors={hasCrown ? [COLORS.GOLD, COLORS.GOLD_GLOW] : [COLORS.ELECTRIC_PURPLE, COLORS.PINK_GLOW]}
               style={styles.levelBadge}
             >
               <Text style={styles.levelBadgeText}>{level}</Text>
             </LinearGradient>
+            {/* Small power indicator badge (only if not crowned) */}
+            {!hasCrown && hasActivePower && (
+              <View style={styles.powerIndicatorBadge}>
+                <Ionicons name="flash" size={10} color={COLORS.DARK_NAVY} />
+              </View>
+            )}
           </View>
           <View style={styles.playerInfo}>
             <Text style={styles.playerName}>@{profile?.display_name}</Text>
@@ -621,6 +740,15 @@ function PlayerStatsHeader({
           <AnimatedStreakBadge days={streak} />
         </View>
       </TouchableOpacity>
+
+      {/* Squad Indicator in header - always visible */}
+      <View style={styles.headerSquadRow}>
+        <SquadIndicatorCompact
+          squad={currentSquad}
+          memberCount={memberCount}
+          onPress={onSquadPress}
+        />
+      </View>
 
       <XPProgressBar current={xp} max={xpToNext} level={level} />
     </Animated.View>
@@ -647,6 +775,68 @@ function XPRewardPreview({ amount }: { amount: number }) {
   );
 }
 
+// No Squad Empty State for Daily Challenge
+function NoSquadChallengeCard({ onJoinSquad }: { onJoinSquad: () => void }) {
+  const glowOpacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    glowOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.6, { duration: 1500 }),
+        withTiming(0.3, { duration: 1500 })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
+  return (
+    <Animated.View
+      entering={ZoomIn.duration(500).springify()}
+      style={styles.challengeCard}
+    >
+      <LinearGradient
+        colors={[COLORS.DEEP_PURPLE, COLORS.MIDNIGHT_BLUE]}
+        style={styles.challengeCardGradient}
+      >
+        <View style={styles.noSquadChallengeContainer}>
+          {/* Animated glow behind icon */}
+          <View style={styles.noSquadIconWrapper}>
+            <Animated.View style={[styles.noSquadIconGlow, glowStyle]} />
+            <View style={styles.noSquadChallengeIcon}>
+              <Ionicons name="people-circle" size={64} color={COLORS.WARNING_AMBER} />
+            </View>
+          </View>
+
+          <Text style={styles.noSquadChallengeTitle}>Join a Squad to Play!</Text>
+          <Text style={styles.noSquadChallengeSubtitle}>
+            Daily challenges require a squad. Create or join one to compete with friends!
+          </Text>
+
+          <TouchableOpacity
+            style={styles.noSquadChallengeButton}
+            onPress={onJoinSquad}
+          >
+            <LinearGradient
+              colors={[COLORS.GAME_ORANGE, COLORS.GAME_CORAL]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.noSquadChallengeButtonGradient}
+            >
+              <Ionicons name="add-circle" size={20} color="#fff" />
+              <Text style={styles.noSquadChallengeButtonText}>Find Your Squad</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    </Animated.View>
+  );
+}
+
 // Daily Challenge Card
 function DailyChallengeCard({
   event,
@@ -656,6 +846,8 @@ function DailyChallengeCard({
   onParticipate,
   onViewResults,
   streak,
+  hasSquad,
+  onJoinSquad,
 }: {
   event: any;
   status: string;
@@ -664,6 +856,8 @@ function DailyChallengeCard({
   onParticipate: () => void;
   onViewResults: () => void;
   streak: number;
+  hasSquad: boolean;
+  onJoinSquad: () => void;
 }) {
   const breatheScale = useSharedValue(1);
 
@@ -681,6 +875,11 @@ function DailyChallengeCard({
   const breatheStyle = useAnimatedStyle(() => ({
     transform: [{ scale: breatheScale.value }],
   }));
+
+  // Show no-squad state if user has no squad
+  if (!hasSquad) {
+    return <NoSquadChallengeCard onJoinSquad={onJoinSquad} />;
+  }
 
   if (!event) {
     return (
@@ -1046,14 +1245,148 @@ function PlayerCardModal({
   );
 }
 
+// Crown Holder Controls Card
+function CrownHolderCard({
+  onSetHeadline,
+  onDeclareRivalry,
+  expiresAt,
+  hasHeadline,
+  hasRivalry,
+}: {
+  onSetHeadline: () => void;
+  onDeclareRivalry: () => void;
+  expiresAt: string;
+  hasHeadline: boolean;
+  hasRivalry: boolean;
+}) {
+  const glowOpacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    glowOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.6, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.3, { duration: 1500, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
+  // Calculate time remaining
+  const now = Date.now();
+  const expiresTime = new Date(expiresAt).getTime();
+  const remainingMs = Math.max(0, expiresTime - now);
+  const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+  const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(100).duration(500)}
+      style={styles.crownHolderCard}
+    >
+      <View style={styles.crownHolderGlowContainer}>
+        <Animated.View style={[styles.crownHolderGlow, glowStyle]} />
+      </View>
+      <LinearGradient
+        colors={[`${COLORS.GOLD}20`, `${COLORS.GOLD_GLOW}10`, COLORS.DEEP_PURPLE]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.crownHolderGradient}
+      >
+        {/* Header */}
+        <View style={styles.crownHolderHeader}>
+          <CrownBadge size="medium" animated />
+          <View style={styles.crownHolderTitleContainer}>
+            <Text style={styles.crownHolderTitle}>CROWN HOLDER</Text>
+            <Text style={styles.crownHolderSubtitle}>
+              {hours}h {minutes}m remaining
+            </Text>
+          </View>
+        </View>
+
+        {/* Actions */}
+        <View style={styles.crownHolderActions}>
+          {!hasHeadline && (
+            <TouchableOpacity
+              style={styles.crownActionButton}
+              onPress={onSetHeadline}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={[COLORS.GOLD, COLORS.GOLD_GLOW]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.crownActionGradient}
+              >
+                <Ionicons name="megaphone" size={18} color={COLORS.DARK_NAVY} />
+                <Text style={styles.crownActionText}>Set Headline</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
+
+          {!hasRivalry && (
+            <TouchableOpacity
+              style={styles.crownActionButton}
+              onPress={onDeclareRivalry}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={['#EF4444', '#DC2626']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.crownActionGradient}
+              >
+                <Ionicons name="flash" size={18} color="#FFFFFF" />
+                <Text style={[styles.crownActionText, { color: '#FFFFFF' }]}>Declare Rivalry</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
+
+          {hasHeadline && hasRivalry && (
+            <View style={styles.crownStatusMessage}>
+              <Ionicons name="checkmark-circle" size={20} color={COLORS.GOLD} />
+              <Text style={styles.crownStatusText}>All powers used for this crown!</Text>
+            </View>
+          )}
+        </View>
+      </LinearGradient>
+    </Animated.View>
+  );
+}
+
 export default function HomeScreen() {
   const router = useRouter();
   const { profile } = useAuthStore();
-  const { currentSquad, squads, setCurrentSquad, members } = useSquadStore();
+  const { currentSquad, squads, setCurrentSquad, members, fetchMembers } = useSquadStore();
   const { fetchTodayEvent, isLoading } = useEventStore();
+  const {
+    activePowers,
+    fetchActivePowers,
+    fetchActiveTargets,
+    getMyActivePower,
+  } = usePowerStore();
+  const {
+    currentCrown,
+    activeHeadline,
+    activeRivalry,
+    fetchCrownData,
+    setHeadline,
+    declareRivalry,
+    isUserCrowned,
+  } = useCrownStore();
   const todayEvent = useRealtimeEvent();
   const [showSquadPicker, setShowSquadPicker] = useState(false);
   const [showPlayerCard, setShowPlayerCard] = useState(false);
+
+  // Crown modal states
+  const [showHeadlineModal, setShowHeadlineModal] = useState(false);
+  const [showRivalryModal, setShowRivalryModal] = useState(false);
+  const [isSubmittingHeadline, setIsSubmittingHeadline] = useState(false);
+  const [isSubmittingRivalry, setIsSubmittingRivalry] = useState(false);
 
   // Mock data for demo - replace with real data from stores
   const userLevel = 12;
@@ -1061,6 +1394,59 @@ export default function HomeScreen() {
   const xpToNextLevel = 2500;
   const userStreak = 7;
   const userRank = 3;
+
+  // Determine if user has a squad
+  const hasSquad = squads.length > 0 && currentSquad !== null;
+
+  // Get user's active power for the current squad
+  const myActivePower = currentSquad ? getMyActivePower(currentSquad.id) : null;
+  const hasActivePower = myActivePower !== null;
+
+  // Check if current user is the crown holder
+  const userIsCrownHolder = profile && currentSquad
+    ? isUserCrowned(profile.id, currentSquad.id)
+    : false;
+
+  // Check if there's an active chaos card being used
+  const activeChaosCard = activePowers.find(
+    (power) =>
+      power.power_type === 'chaos_card' &&
+      power.used_at !== null &&
+      currentSquad &&
+      power.squad_id === currentSquad.id
+  );
+
+  // Get chaos rule information
+  const getChaosRuleInfo = () => {
+    if (!activeChaosCard || !activeChaosCard.metadata?.rule) {
+      return null;
+    }
+    const ruleKey = activeChaosCard.metadata.rule as keyof typeof CHAOS_RULES;
+    const rule = CHAOS_RULES[ruleKey];
+    return rule || { name: activeChaosCard.metadata.rule, description: '' };
+  };
+
+  const chaosRuleInfo = getChaosRuleInfo();
+
+  // Get chaos card activator name (would need to fetch from profiles in real implementation)
+  const chaosCardActivator = activeChaosCard ? 'Underdog' : '';
+
+  // Get headline player name from members
+  const getHeadlinePlayerName = () => {
+    if (!activeHeadline) return '';
+    const member = members.find(m => m.user_id === activeHeadline.user_id);
+    return member?.profile?.display_name || 'Crown Holder';
+  };
+
+  // Get rivalry player data
+  const getRivalryPlayerData = (userId: string) => {
+    const member = members.find(m => m.user_id === userId);
+    return {
+      id: userId,
+      name: member?.profile?.display_name || 'Player',
+      avatarUrl: member?.profile?.avatar_url || null,
+    };
+  };
 
   const handleSquadSelect = (squad: typeof currentSquad) => {
     if (squad) {
@@ -1070,9 +1456,67 @@ export default function HomeScreen() {
     }
   };
 
+  const handleJoinSquad = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push('/(auth)/squad' as Href);
+  };
+
+  const handlePowerPress = () => {
+    if (!myActivePower) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    // If target_lock power, log for now (modal integration later)
+    if (myActivePower.power_type === 'target_lock') {
+      console.log('Target Lock pressed - would show target selection modal');
+      // TODO: Show target selection modal
+    } else {
+      console.log('Power pressed:', myActivePower.power_type);
+    }
+  };
+
+  // Handle headline submission
+  const handleHeadlineSubmit = async (headline: string) => {
+    if (!currentCrown) return;
+
+    setIsSubmittingHeadline(true);
+    const { error } = await setHeadline(currentCrown.id, headline);
+    setIsSubmittingHeadline(false);
+
+    if (!error) {
+      setShowHeadlineModal(false);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      console.error('Failed to set headline:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
+
+  // Handle rivalry declaration
+  const handleRivalryDeclare = async (rival1Id: string, rival2Id: string) => {
+    if (!currentCrown) return;
+
+    setIsSubmittingRivalry(true);
+    const { error } = await declareRivalry(currentCrown.id, rival1Id, rival2Id);
+    setIsSubmittingRivalry(false);
+
+    if (!error) {
+      setShowRivalryModal(false);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      console.error('Failed to declare rivalry:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
+
+  // Fetch data when squad changes
   useEffect(() => {
     if (currentSquad) {
       fetchTodayEvent(currentSquad.id);
+      fetchMembers(currentSquad.id);
+      fetchActivePowers(currentSquad.id);
+      fetchActiveTargets(currentSquad.id);
+      fetchCrownData(currentSquad.id);
     }
   }, [currentSquad]);
 
@@ -1099,8 +1543,18 @@ export default function HomeScreen() {
   const handleRefresh = () => {
     if (currentSquad) {
       fetchTodayEvent(currentSquad.id);
+      fetchActivePowers(currentSquad.id);
+      fetchActiveTargets(currentSquad.id);
+      fetchCrownData(currentSquad.id);
     }
   };
+
+  // Prepare squad members for rivalry modal (format expected by component)
+  const squadMembersForRivalry = members.map(m => ({
+    id: m.user_id,
+    name: m.profile?.display_name || 'Player',
+    avatarUrl: m.profile?.avatar_url || null,
+  }));
 
   return (
     <View style={styles.container}>
@@ -1126,27 +1580,102 @@ export default function HomeScreen() {
             />
           }
         >
-          {/* Player Stats Header */}
+          {/* Headline Banner - Show at top if there's an active headline */}
+          {activeHeadline && (
+            <Animated.View entering={FadeInDown.duration(500)}>
+              <HeadlineBanner
+                headline={activeHeadline.content}
+                playerName={getHeadlinePlayerName()}
+                avatarUrl={members.find(m => m.user_id === activeHeadline.user_id)?.profile?.avatar_url ?? undefined}
+                expiresAt={new Date(activeHeadline.expires_at).getTime()}
+                visible={true}
+              />
+            </Animated.View>
+          )}
+
+          {/* Chaos Card Banner - Show if active */}
+          {activeChaosCard && chaosRuleInfo && (
+            <Animated.View entering={FadeInDown.duration(500)}>
+              <ChaosCardBanner
+                ruleName={chaosRuleInfo.name}
+                activatedBy={chaosCardActivator}
+                ruleDescription={chaosRuleInfo.description}
+                visible={true}
+              />
+            </Animated.View>
+          )}
+
+          {/* Player Stats Header with integrated squad indicator */}
           <PlayerStatsHeader
             profile={profile}
             level={userLevel}
             xp={userXP}
             xpToNext={xpToNextLevel}
             streak={userStreak}
+            currentSquad={currentSquad}
+            memberCount={members.length}
+            hasActivePower={hasActivePower}
+            hasCrown={userIsCrownHolder}
             onPress={() => setShowPlayerCard(true)}
+            onSquadPress={() => hasSquad ? setShowSquadPicker(true) : handleJoinSquad()}
           />
 
-          {/* Squad Selector */}
-          {squads.length > 1 && (
-            <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-              <TouchableOpacity
-                style={styles.squadSelector}
-                onPress={() => setShowSquadPicker(true)}
-              >
-                <Ionicons name="people" size={16} color={COLORS.TEXT_SECONDARY} />
-                <Text style={styles.squadName}>{currentSquad?.name}</Text>
-                <Ionicons name="chevron-down" size={16} color={COLORS.TEXT_SECONDARY} />
-              </TouchableOpacity>
+          {/* PROMINENT SQUAD STATUS BANNER - First thing after header */}
+          <View style={styles.section}>
+            <SquadStatusBanner
+              currentSquad={currentSquad}
+              members={members}
+              onJoinSquad={handleJoinSquad}
+              onSwitchSquad={() => setShowSquadPicker(true)}
+              onInviteFriends={() => {
+                // Could open share modal
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              }}
+              hasMultipleSquads={squads.length > 1}
+            />
+          </View>
+
+          {/* Crown Holder Controls - Show if user is the crown holder */}
+          {userIsCrownHolder && currentCrown && (
+            <View style={styles.section}>
+              <CrownHolderCard
+                onSetHeadline={() => setShowHeadlineModal(true)}
+                onDeclareRivalry={() => setShowRivalryModal(true)}
+                expiresAt={currentCrown.expires_at}
+                hasHeadline={!!activeHeadline}
+                hasRivalry={!!activeRivalry}
+              />
+            </View>
+          )}
+
+          {/* Underdog Power Badge - Show if user has active power (and not crown holder) */}
+          {myActivePower && !userIsCrownHolder && (
+            <Animated.View
+              entering={FadeInDown.delay(200).duration(500)}
+              style={styles.section}
+            >
+              <UnderdogPowerBadge
+                powerType={myActivePower.power_type as PowerType}
+                expiresAt={new Date(myActivePower.expires_at)}
+                onPress={handlePowerPress}
+                showLabel={true}
+              />
+            </Animated.View>
+          )}
+
+          {/* Rivalry Panel - Show if there's an active rivalry */}
+          {activeRivalry && (
+            <Animated.View
+              entering={FadeInDown.delay(250).duration(500)}
+              style={styles.section}
+            >
+              <RivalryPanel
+                rival1={getRivalryPlayerData(activeRivalry.rival1_id)}
+                rival2={getRivalryPlayerData(activeRivalry.rival2_id)}
+                declaredBy={getRivalryPlayerData(activeRivalry.declarer_id).name}
+                expiresAt={new Date(activeRivalry.expires_at).getTime()}
+                visible={true}
+              />
             </Animated.View>
           )}
 
@@ -1166,6 +1695,8 @@ export default function HomeScreen() {
               onParticipate={handleParticipate}
               onViewResults={handleViewResults}
               streak={userStreak}
+              hasSquad={hasSquad}
+              onJoinSquad={handleJoinSquad}
             />
           </View>
 
@@ -1202,10 +1733,15 @@ export default function HomeScreen() {
               <QuickActionButton
                 icon="people"
                 label="Squad"
-                color={COLORS.ELECTRIC_CYAN}
+                color={hasSquad ? COLORS.ELECTRIC_CYAN : COLORS.WARNING_AMBER}
+                showIndicator={hasActivePower || userIsCrownHolder}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/squad' as Href);
+                  if (hasSquad) {
+                    setShowSquadPicker(true);
+                  } else {
+                    handleJoinSquad();
+                  }
                 }}
               />
               <QuickActionButton
@@ -1220,7 +1756,7 @@ export default function HomeScreen() {
             </Animated.View>
           </View>
 
-          {/* Invite Section */}
+          {/* Invite Section - only show if in a squad */}
           {currentSquad && (
             <Animated.View
               entering={FadeInDown.delay(600).duration(400)}
@@ -1353,6 +1889,24 @@ export default function HomeScreen() {
           streak={userStreak}
           rank={userRank}
         />
+
+        {/* Headline Input Modal */}
+        <HeadlineInputModal
+          visible={showHeadlineModal}
+          onClose={() => setShowHeadlineModal(false)}
+          onSubmit={handleHeadlineSubmit}
+          isLoading={isSubmittingHeadline}
+        />
+
+        {/* Rivalry Declaration Modal */}
+        <RivalryDeclarationModal
+          visible={showRivalryModal}
+          onClose={() => setShowRivalryModal(false)}
+          onDeclare={handleRivalryDeclare}
+          squadMembers={squadMembersForRivalry}
+          currentUserId={profile?.id || ''}
+          isLoading={isSubmittingRivalry}
+        />
       </View>
     </View>
   );
@@ -1428,6 +1982,57 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
+  // Underdog Power Glow
+  underdogGlow: {
+    position: 'absolute',
+    top: -8,
+    left: -8,
+    right: -8,
+    bottom: -8,
+    borderRadius: 30,
+    overflow: 'hidden',
+  },
+  underdogGlowGradient: {
+    flex: 1,
+    borderRadius: 30,
+  },
+
+  // Crown Glow (golden)
+  crownGlow: {
+    position: 'absolute',
+    top: -8,
+    left: -8,
+    right: -8,
+    bottom: -8,
+    borderRadius: 30,
+    overflow: 'hidden',
+  },
+  crownGlowGradient: {
+    flex: 1,
+    borderRadius: 30,
+  },
+
+  // Power indicator badge on avatar
+  powerIndicatorBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COLORS.GAME_ORANGE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.DARK_NAVY,
+  },
+
+  // Header squad row
+  headerSquadRow: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+
   // Streak Badge
   streakBadge: {
     flexDirection: 'row',
@@ -1497,7 +2102,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
 
-  // Squad Selector
+  // Squad Selector (legacy - kept for modal)
   squadSelector: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1525,7 +2130,7 @@ const styles = StyleSheet.create({
 
   // Sections
   section: {
-    marginTop: 20,
+    marginTop: 16,
   },
   sectionTitle: {
     fontSize: 12,
@@ -1580,6 +2185,59 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 12,
     letterSpacing: 1,
+  },
+
+  // No Squad Challenge State
+  noSquadChallengeContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  noSquadIconWrapper: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  noSquadIconGlow: {
+    position: 'absolute',
+    top: -10,
+    left: -10,
+    right: -10,
+    bottom: -10,
+    backgroundColor: COLORS.WARNING_AMBER,
+    borderRadius: 50,
+  },
+  noSquadChallengeIcon: {
+    zIndex: 1,
+  },
+  noSquadChallengeTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: COLORS.TEXT_PRIMARY,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  noSquadChallengeSubtitle: {
+    fontSize: 14,
+    color: COLORS.TEXT_MUTED,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+    paddingHorizontal: 16,
+  },
+  noSquadChallengeButton: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  noSquadChallengeButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+  },
+  noSquadChallengeButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
   },
 
   // Status Badges
@@ -1846,6 +2504,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  quickActionIconContainer: {
+    position: 'relative',
+  },
+  quickActionIndicator: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: COLORS.DARK_NAVY,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickActionIndicatorDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.GAME_ORANGE,
+  },
   quickActionLabel: {
     fontSize: 14,
     fontWeight: '600',
@@ -1926,6 +2604,83 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.DARK_NAVY,
     flex: 1,
+  },
+
+  // Crown Holder Card
+  crownHolderCard: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: COLORS.GOLD,
+    position: 'relative',
+  },
+  crownHolderGlowContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  crownHolderGlow: {
+    flex: 1,
+    backgroundColor: COLORS.GOLD,
+  },
+  crownHolderGradient: {
+    padding: 16,
+  },
+  crownHolderHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  crownHolderTitleContainer: {
+    flex: 1,
+  },
+  crownHolderTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: COLORS.GOLD,
+    letterSpacing: 1,
+  },
+  crownHolderSubtitle: {
+    fontSize: 12,
+    color: COLORS.TEXT_MUTED,
+    marginTop: 2,
+  },
+  crownHolderActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  crownActionButton: {
+    flex: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  crownActionGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  crownActionText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.DARK_NAVY,
+  },
+  crownStatusMessage: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+  },
+  crownStatusText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.GOLD,
   },
 
   // Modals

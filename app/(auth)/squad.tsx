@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Localization from 'expo-localization';
 import { Input } from '../../src/components/Input';
@@ -27,6 +27,8 @@ export default function SquadScreen() {
   const [error, setError] = useState('');
   const { createSquad, joinSquad, isLoading } = useSquadStore();
   const router = useRouter();
+  const navigation = useNavigation();
+  const canGoBack = navigation.canGoBack();
 
   const handleCreate = async () => {
     if (!squadName.trim() || squadName.length < 2) {
@@ -61,9 +63,22 @@ export default function SquadScreen() {
     }
   };
 
+  const handleSkip = () => {
+    router.replace('/(tabs)');
+  };
+
   if (mode === 'choose') {
     return (
       <SafeAreaView style={styles.container}>
+        {canGoBack && (
+          <TouchableOpacity
+            style={styles.backButtonTop}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+        )}
+
         <View style={styles.content}>
           <View style={styles.header}>
             <Ionicons name="people" size={48} color="#6366f1" />
@@ -79,10 +94,12 @@ export default function SquadScreen() {
                 <View style={styles.optionIcon}>
                   <Ionicons name="add-circle" size={32} color="#10b981" />
                 </View>
-                <Text style={styles.optionTitle}>Create a Squad</Text>
-                <Text style={styles.optionDesc}>
-                  Start a new squad and invite friends
-                </Text>
+                <View style={styles.optionTextContainer}>
+                  <Text style={styles.optionTitle}>Create a Squad</Text>
+                  <Text style={styles.optionDesc}>
+                    Start a new squad and invite friends
+                  </Text>
+                </View>
               </Card>
             </TouchableOpacity>
 
@@ -91,13 +108,19 @@ export default function SquadScreen() {
                 <View style={styles.optionIcon}>
                   <Ionicons name="enter" size={32} color="#6366f1" />
                 </View>
-                <Text style={styles.optionTitle}>Join a Squad</Text>
-                <Text style={styles.optionDesc}>
-                  Enter an invite code from a friend
-                </Text>
+                <View style={styles.optionTextContainer}>
+                  <Text style={styles.optionTitle}>Join a Squad</Text>
+                  <Text style={styles.optionDesc}>
+                    Enter an invite code from a friend
+                  </Text>
+                </View>
               </Card>
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
+            <Text style={styles.skipText}>Skip for now</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -199,11 +222,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     justifyContent: 'center',
   },
+  backButtonTop: {
+    position: 'absolute',
+    top: 60,
+    left: 24,
+    zIndex: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#374151',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   backButton: {
     position: 'absolute',
     top: 16,
     left: 0,
     padding: 8,
+  },
+  skipButton: {
+    marginTop: 32,
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  skipText: {
+    fontSize: 16,
+    color: '#9ca3af',
+    textDecorationLine: 'underline',
   },
   header: {
     alignItems: 'center',
@@ -236,6 +281,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#374151',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  optionTextContainer: {
+    flex: 1,
+    flexDirection: 'column',
   },
   optionTitle: {
     fontSize: 18,

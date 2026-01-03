@@ -773,10 +773,12 @@ function JoinSquadScreen({
   displayName,
   selectedAvatar,
   earnedXP,
+  onBack,
 }: {
   displayName: string;
   selectedAvatar: AvatarIcon | null;
   earnedXP: number;
+  onBack: () => void;
 }) {
   const router = useRouter();
   const { updateProfile, isLoading } = useAuthStore();
@@ -861,6 +863,10 @@ function JoinSquadScreen({
 
   return (
     <View style={styles.screenContainer}>
+      <Pressable onPress={onBack} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color="#fff" />
+      </Pressable>
+
       <Animated.Text entering={FadeInDown.duration(500)} style={styles.screenTitle}>
         FIND YOUR SQUAD
       </Animated.Text>
@@ -981,6 +987,12 @@ export default function OnboardingScreen() {
     }
   };
 
+  const goBack = () => {
+    if (currentScreen > 0) {
+      setCurrentScreen(currentScreen - 1);
+    }
+  };
+
   const renderScreen = () => {
     switch (currentScreen) {
       case 0:
@@ -1009,6 +1021,7 @@ export default function OnboardingScreen() {
             displayName={displayName}
             selectedAvatar={selectedAvatar}
             earnedXP={earnedXP}
+            onBack={goBack}
           />
         );
       default:
