@@ -1,6 +1,7 @@
 /**
  * RTL Provider Component
  * Wraps the app and provides RTL context for Hebrew language support
+ * Syncs with languageStore for consistent RTL state management
  */
 
 import React, {
@@ -15,11 +16,10 @@ import React, {
 import {
   I18nManager,
   Platform,
-  NativeModules,
+  View,
+  StyleSheet,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const RTL_STORAGE_KEY = '@squad_game_rtl_enabled';
+import { useLanguageStore } from '../store/languageStore';
 
 /**
  * RTL Context value type
@@ -29,16 +29,14 @@ export interface RTLContextValue {
   isRTL: boolean;
   /** Current text direction */
   direction: 'ltr' | 'rtl';
-  /** Toggle RTL mode (requires app restart) */
-  toggleRTL: () => Promise<void>;
-  /** Set RTL mode explicitly (requires app restart) */
-  setRTL: (enabled: boolean) => Promise<void>;
   /** Whether a restart is pending to apply RTL changes */
-  restartPending: boolean;
+  needsRestart: boolean;
   /** Current locale code */
   locale: string;
   /** Whether Hebrew is the current language */
   isHebrew: boolean;
+  /** Trigger app restart to apply RTL changes */
+  restartForRTL: () => Promise<void>;
 }
 
 /**
@@ -47,11 +45,10 @@ export interface RTLContextValue {
 const defaultContextValue: RTLContextValue = {
   isRTL: I18nManager.isRTL,
   direction: I18nManager.isRTL ? 'rtl' : 'ltr',
-  toggleRTL: async () => {},
-  setRTL: async () => {},
-  restartPending: false,
+  needsRestart: false,
   locale: 'en',
   isHebrew: false,
+  restartForRTL: async () => {},
 };
 
 /**
@@ -64,176 +61,62 @@ const RTLContext = createContext<RTLContextValue>(defaultContextValue);
  */
 interface RTLProviderProps {
   children: ReactNode;
-  /** Default locale to use if none is detected */
-  defaultLocale?: string;
-  /** Force RTL mode regardless of locale */
-  forceRTL?: boolean;
-}
-
-/**
- * Hebrew locale codes
- */
-const HEBREW_LOCALES = ['he', 'he-IL', 'iw', 'iw-IL'];
-
-/**
- * Get device locale
- */
-function getDeviceLocale(): string {
-  try {
-    if (Platform.OS === 'web') {
-      return navigator?.language || 'en';
-    }
-
-    // Try to get locale from Expo Localization or native modules
-    const { ExpoLocalization } = NativeModules;
-    if (ExpoLocalization?.locale) {
-      return ExpoLocalization.locale;
-    }
-
-    // Fallback for older React Native versions
-    const locale =
-      Platform.OS === 'ios'
-        ? NativeModules.SettingsManager?.settings?.AppleLocale ||
-          NativeModules.SettingsManager?.settings?.AppleLanguages?.[0]
-        : NativeModules.I18nManager?.localeIdentifier;
-
-    return locale || 'en';
-  } catch {
-    return 'en';
-  }
-}
-
-/**
- * Check if locale is Hebrew
- */
-function isHebrewLocale(locale: string): boolean {
-  const normalizedLocale = locale.toLowerCase().split('_')[0].split('-')[0];
-  return HEBREW_LOCALES.some((hl) => hl.toLowerCase().startsWith(normalizedLocale));
-}
-
-/**
- * Apply RTL settings to the app
- * Note: Changes require app restart to take full effect
- */
-function applyRTLSettings(enable: boolean): void {
-  if (I18nManager.isRTL !== enable) {
-    I18nManager.allowRTL(enable);
-    I18nManager.forceRTL(enable);
-  }
 }
 
 /**
  * RTL Provider Component
- * Provides RTL context and manages RTL state
+ * Provides RTL context and manages RTL state in sync with languageStore
  */
-export function RTLProvider({
-  children,
-  defaultLocale = 'en',
-  forceRTL: forceRTLProp,
-}: RTLProviderProps) {
-  const [isRTL, setIsRTL] = useState(I18nManager.isRTL);
-  const [restartPending, setRestartPending] = useState(false);
-  const [locale, setLocale] = useState(defaultLocale);
-  const [isInitialized, setIsInitialized] = useState(false);
+export function RTLProvider({ children }: RTLProviderProps) {
+  const {
+    language,
+    isRTL: storeIsRTL,
+    needsRestart,
+    restartApp,
+  } = useLanguageStore();
 
-  // Initialize RTL settings on mount
-  useEffect(() => {
-    async function initialize() {
-      try {
-        // Get device locale
-        const deviceLocale = getDeviceLocale();
-        setLocale(deviceLocale);
+  // On native, use I18nManager.isRTL for actual layout direction
+  // On web, use the store's isRTL value
+  const actualIsRTL = Platform.OS === 'web' ? storeIsRTL : I18nManager.isRTL;
 
-        // Check for stored RTL preference
-        const storedRTL = await AsyncStorage.getItem(RTL_STORAGE_KEY);
-
-        // Determine if RTL should be enabled
-        let shouldEnableRTL: boolean;
-
-        if (forceRTLProp !== undefined) {
-          // Use forced RTL prop
-          shouldEnableRTL = forceRTLProp;
-        } else if (storedRTL !== null) {
-          // Use stored preference
-          shouldEnableRTL = storedRTL === 'true';
-        } else {
-          // Use device locale to determine RTL
-          shouldEnableRTL = isHebrewLocale(deviceLocale);
-        }
-
-        // Apply RTL settings if different from current
-        if (shouldEnableRTL !== I18nManager.isRTL) {
-          applyRTLSettings(shouldEnableRTL);
-          setRestartPending(true);
-        }
-
-        setIsRTL(shouldEnableRTL);
-        setIsInitialized(true);
-      } catch (error) {
-        console.error('Failed to initialize RTL settings:', error);
-        setIsInitialized(true);
-      }
-    }
-
-    initialize();
-  }, [forceRTLProp]);
-
-  // Toggle RTL mode
-  const toggleRTL = useCallback(async () => {
-    const newValue = !isRTL;
-
-    try {
-      // Store preference
-      await AsyncStorage.setItem(RTL_STORAGE_KEY, newValue.toString());
-
-      // Apply settings
-      applyRTLSettings(newValue);
-
-      setIsRTL(newValue);
-      setRestartPending(true);
-    } catch (error) {
-      console.error('Failed to toggle RTL:', error);
-    }
-  }, [isRTL]);
-
-  // Set RTL mode explicitly
-  const setRTLMode = useCallback(async (enabled: boolean) => {
-    if (enabled === isRTL) return;
-
-    try {
-      // Store preference
-      await AsyncStorage.setItem(RTL_STORAGE_KEY, enabled.toString());
-
-      // Apply settings
-      applyRTLSettings(enabled);
-
-      setIsRTL(enabled);
-      setRestartPending(true);
-    } catch (error) {
-      console.error('Failed to set RTL:', error);
-    }
-  }, [isRTL]);
-
-  // Context value
+  // Context value synced with language store
   const contextValue = useMemo<RTLContextValue>(
     () => ({
-      isRTL,
-      direction: isRTL ? 'rtl' : 'ltr',
-      toggleRTL,
-      setRTL: setRTLMode,
-      restartPending,
-      locale,
-      isHebrew: isHebrewLocale(locale),
+      isRTL: actualIsRTL,
+      direction: actualIsRTL ? 'rtl' : 'ltr',
+      needsRestart,
+      locale: language,
+      isHebrew: language === 'he',
+      restartForRTL: restartApp,
     }),
-    [isRTL, toggleRTL, setRTLMode, restartPending, locale]
+    [actualIsRTL, needsRestart, language, restartApp]
   );
+
+  // Apply RTL direction to the root view for web
+  const rootStyle = useMemo(() => {
+    if (Platform.OS === 'web') {
+      return {
+        flex: 1,
+        direction: storeIsRTL ? 'rtl' : 'ltr',
+      } as const;
+    }
+    return styles.root;
+  }, [storeIsRTL]);
 
   return (
     <RTLContext.Provider value={contextValue}>
-      {children}
+      <View style={rootStyle}>
+        {children}
+      </View>
     </RTLContext.Provider>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});
 
 /**
  * Hook to access RTL context

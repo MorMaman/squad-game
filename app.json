@@ -52,11 +52,19 @@
           "cameraPermission": "Squad Game needs camera access for live selfie events"
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-updates"
     ],
     "scheme": "squadgame",
     "experiments": {
       "typedRoutes": true
+    },
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }

@@ -5,6 +5,7 @@
 
 import { I18nManager, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
 import { useCallback, useMemo } from 'react';
+import { useLanguageStore } from '../store/languageStore';
 
 /**
  * Direction type for RTL-aware styles
@@ -22,8 +23,15 @@ export interface RTLValue {
 
 /**
  * Check if the current locale is RTL
+ * On native, uses I18nManager.isRTL for actual layout direction
+ * On web, uses the language store's isRTL value
  */
 export function isRTLLocale(): boolean {
+  if (Platform.OS === 'web') {
+    // On web, we can't use I18nManager reliably
+    // Return false as default, use useRTL hook for reactive value
+    return false;
+  }
   return I18nManager.isRTL;
 }
 
@@ -209,6 +217,7 @@ export function createRTLStyles<T extends StyleSheet.NamedStyles<T>>(
 
 /**
  * Helper to create margin/padding with RTL support
+ * Uses start/end properties which are automatically handled by RN
  */
 export function rtlSpacing(
   start: number,
@@ -243,14 +252,20 @@ export function rtlStyle<T extends ViewStyle | TextStyle>(
 /**
  * Hook to get RTL utilities
  * Returns isRTL, direction, and flipStyle function
+ * This hook is reactive and will update when language changes
  */
 export function useRTL(): RTLValue {
-  const isRTL = I18nManager.isRTL;
+  // Use language store for reactive updates
+  const { isRTL: storeIsRTL, language } = useLanguageStore();
+
+  // On native, prefer I18nManager.isRTL for actual layout direction
+  // On web, use the store value
+  const isRTL = Platform.OS === 'web' ? storeIsRTL : I18nManager.isRTL;
   const direction: Direction = isRTL ? 'rtl' : 'ltr';
 
   const flipStyleFn = useCallback(<T extends ViewStyle | TextStyle>(style: T): T => {
-    return flipStyle(style);
-  }, []);
+    return flipStyle(style, isRTL);
+  }, [isRTL]);
 
   return useMemo(
     () => ({
@@ -341,4 +356,32 @@ export function getWritingDirection(): TextStyle {
   return {
     writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   };
+}
+
+/**
+ * Get text align style based on RTL
+ * 'auto' will automatically align based on text content
+ */
+export function getTextAlignStyle(): TextStyle {
+  return {
+    textAlign: I18nManager.isRTL ? 'right' : 'left',
+  };
+}
+
+/**
+ * Get flex row style that respects RTL
+ * Uses 'row' which React Native automatically reverses in RTL
+ */
+export function getFlexRowStyle(): ViewStyle {
+  return {
+    flexDirection: 'row',
+  };
+}
+
+/**
+ * Check if current layout direction matches expected RTL state
+ */
+export function isLayoutDirectionCorrect(expectedRTL: boolean): boolean {
+  if (Platform.OS === 'web') return true;
+  return I18nManager.isRTL === expectedRTL;
 }

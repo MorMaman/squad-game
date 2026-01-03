@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { I18nManager, View, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRTL } from '../../src/utils/rtl';
+import { useLanguageStore } from '../../src/store/languageStore';
 
 /**
  * Tab bar icon wrapper that handles RTL flipping for directional icons
@@ -26,27 +26,33 @@ function TabBarIcon({
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
-  const { isRTL } = useRTL();
+  // Use language store's isRTL instead of I18nManager.isRTL
+  // This ensures RTL works even when device language is English
+  const { isRTL } = useLanguageStore();
   const { t } = useTranslation();
 
-  // Define tabs in the order they should appear
-  // For RTL, expo-router handles the visual order, but we need to ensure
-  // swipe gestures work correctly
   const tabBarStyle = {
     backgroundColor: '#0A0E27',
     borderTopColor: '#1A1A2E',
     paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
     paddingTop: 8,
     height: 60 + (insets.bottom > 0 ? insets.bottom : 0),
-    // RTL layout is handled automatically by React Native's I18nManager
-    // but we can add explicit direction if needed
+    // Force RTL direction on the tab bar based on app language setting
     ...(isRTL && { direction: 'rtl' as const }),
   };
+
+  // Define tab screens - we'll control order via flexDirection in tabBarStyle
+  // For RTL, we want: Settings | Leaderboard | Games | Today (right to left)
+  // Expo Router doesn't support dynamic tab reordering, so we use flexDirection
+  const tabBarContainerStyle = isRTL ? { flexDirection: 'row-reverse' as const } : {};
 
   return (
     <Tabs
       screenOptions={{
-        tabBarStyle,
+        tabBarStyle: {
+          ...tabBarStyle,
+          ...tabBarContainerStyle,
+        },
         tabBarActiveTintColor: '#FF6B00',
         tabBarInactiveTintColor: '#6b7280',
         headerStyle: {

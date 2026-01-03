@@ -243,7 +243,12 @@
     "signOut": "Sign Out",
     "deleteAccount": "Delete Account",
     "confirmLogout": "Are you sure you want to sign out?",
-    "confirmDelete": "Are you sure you want to delete your account? This action cannot be undone."
+    "confirmDelete": "Are you sure you want to delete your account? This action cannot be undone.",
+    "rtl": {
+      "restartRequired": "Restart required to apply changes",
+      "restartNow": "Restart",
+      "languageChangeRequiresRestart": "Changing text direction requires app restart"
+    }
   },
   "auth": {
     "login": "Login",

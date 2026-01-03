@@ -2,6 +2,7 @@
  * LanguageSelector Component
  * A beautiful toggle/dropdown to switch between English and Hebrew
  * Matches the game's dark theme with gradients and animations
+ * Handles RTL switching with automatic app restart
  */
 
 import React, { useState } from 'react';
@@ -14,6 +15,7 @@ import {
   Pressable,
   Alert,
   Platform,
+  I18nManager,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,8 +25,6 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   withTiming,
-  FadeIn,
-  FadeOut,
   SlideInDown,
   SlideOutDown,
 } from 'react-native-reanimated';
@@ -44,6 +44,7 @@ const COLORS = {
   TEXT_SECONDARY: '#A78BFA',
   TEXT_MUTED: '#6B7280',
   BORDER: '#374151',
+  SUCCESS: '#10B981',
 };
 
 // Language configuration with flags
@@ -64,13 +65,12 @@ interface LanguageSelectorProps {
   variant?: 'compact' | 'full';
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
   const { t } = useTranslation();
-  const { language, isRTL, setLanguage } = useLanguageStore();
+  const { language, isRTL, setLanguage, restartApp, acknowledgeRestart, needsRestart } = useLanguageStore();
   const [showModal, setShowModal] = useState(false);
   const [pendingLanguage, setPendingLanguage] = useState<SupportedLanguage | null>(null);
+  const [isChanging, setIsChanging] = useState(false);
 
   const scale = useSharedValue(1);
 
@@ -86,48 +86,115 @@ export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
   };
 
   const handleLanguageSelect = async (selectedLanguage: SupportedLanguage) => {
-    if (selectedLanguage === language) {
+    if (selectedLanguage === language || isChanging) {
       setShowModal(false);
       return;
     }
 
-    // Check if RTL change requires restart
-    const newIsRTL = selectedLanguage === 'he';
-    const currentIsRTL = isRTL;
+    setIsChanging(true);
+    setPendingLanguage(selectedLanguage);
 
-    if (newIsRTL !== currentIsRTL && Platform.OS !== 'web') {
-      setPendingLanguage(selectedLanguage);
-      // Show restart prompt
+    // Check if RTL change is needed
+    const newIsRTL = selectedLanguage === 'he';
+    const currentLayoutRTL = Platform.OS === 'web' ? isRTL : I18nManager.isRTL;
+    const needsRTLChange = newIsRTL !== currentLayoutRTL && Platform.OS !== 'web';
+
+    if (needsRTLChange) {
+      // Show restart prompt for RTL change
+      // In dev mode, let users know they'll need to reload manually
+      const devModeNote = __DEV__
+        ? (selectedLanguage === 'he'
+          ? '\n\n(Expo Go: \u05D9\u05D3\u05E8\u05E9 \u05D8\u05E2\u05D9\u05E0\u05D4 \u05D9\u05D3\u05E0\u05D9\u05EA)'
+          : '\n\n(Expo Go: Manual reload required)')
+        : '';
+
       Alert.alert(
         t('settings.language'),
-        selectedLanguage === 'he'
-          ? 'Changing to Hebrew requires app restart for RTL layout.\n\nשינוי לעברית דורש הפעלה מחדש של האפליקציה לתצוגת RTL.'
-          : 'Changing to English requires app restart for LTR layout.',
+        (selectedLanguage === 'he'
+          ? 'Changing to Hebrew requires app restart for RTL layout.\n\n\u05E9\u05D9\u05E0\u05D5\u05D9 \u05DC\u05E2\u05D1\u05E8\u05D9\u05EA \u05D3\u05D5\u05E8\u05E9 \u05D4\u05E4\u05E2\u05DC\u05D4 \u05DE\u05D7\u05D3\u05E9 \u05DC\u05EA\u05E6\u05D5\u05D2\u05EA RTL.'
+          : 'Changing to English requires app restart for LTR layout.') + devModeNote,
         [
           {
             text: t('common.cancel'),
             style: 'cancel',
             onPress: () => {
               setPendingLanguage(null);
+              setIsChanging(false);
               setShowModal(false);
             },
           },
           {
-            text: t('common.confirm'),
+            text: __DEV__
+              ? (selectedLanguage === 'he' ? '\u05E9\u05DE\u05D5\u05E8 \u05D5\u05D4\u05E4\u05E2\u05DC \u05D9\u05D3\u05E0\u05D9\u05EA' : 'Save & Reload Manually')
+              : (selectedLanguage === 'he' ? '\u05D4\u05E4\u05E2\u05DC \u05DE\u05D7\u05D3\u05E9' : 'Restart Now'),
             style: 'default',
             onPress: async () => {
-              await setLanguage(selectedLanguage);
-              setPendingLanguage(null);
-              setShowModal(false);
+              try {
+                // Set the language (this will trigger forceRTL)
+                await setLanguage(selectedLanguage);
+
+                if (Platform.OS !== 'web') {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+
+                // In Expo Go (dev mode), show manual reload instructions immediately
+                // Don't try to restart as it won't work
+                if (__DEV__) {
+                  setShowModal(false);
+                  // Acknowledge the restart so the banner won't show on next JS reload
+                  await acknowledgeRestart();
+                  // Show instructions for manual reload
+                  Alert.alert(
+                    selectedLanguage === 'he' ? '\u05D4\u05D4\u05D2\u05D3\u05E8\u05D5\u05EA \u05E0\u05E9\u05DE\u05E8\u05D5!' : 'Settings Saved!',
+                    selectedLanguage === 'he'
+                      ? '\u05DB\u05D3\u05D9 \u05DC\u05D4\u05D7\u05D9\u05DC \u05D0\u05EA \u05DB\u05D9\u05D5\u05D5\u05DF \u05D4\u05D8\u05E7\u05E1\u05D8 (RTL):\n\n1. \u05E0\u05E2\u05E8 \u05D0\u05EA \u05D4\u05DE\u05DB\u05E9\u05D9\u05E8\n2. \u05DC\u05D7\u05E5 \u05E2\u05DC "Reload"\n\n\u05D0\u05D5 \u05DC\u05D7\u05E5 Cmd+R (iOS) / R+R (Android)'
+                      : 'To apply the text direction change (LTR):\n\n1. Shake your device\n2. Tap "Reload"\n\nOr press Cmd+R (iOS) / R+R (Android)',
+                    [{ text: 'OK', style: 'default' }]
+                  );
+                } else {
+                  // Production build - close modal and restart app
+                  setShowModal(false);
+
+                  // Small delay to ensure state is saved
+                  setTimeout(async () => {
+                    const restarted = await restartApp();
+
+                    // Fallback in case restart fails in production
+                    if (!restarted) {
+                      Alert.alert(
+                        selectedLanguage === 'he' ? '\u05E0\u05D3\u05E8\u05E9 \u05D4\u05E4\u05E2\u05DC\u05D4 \u05DE\u05D7\u05D3\u05E9' : 'Manual Restart Required',
+                        selectedLanguage === 'he'
+                          ? '\u05E1\u05D2\u05D5\u05E8 \u05D0\u05EA \u05D4\u05D0\u05E4\u05DC\u05D9\u05E7\u05E6\u05D9\u05D4 \u05D5\u05E4\u05EA\u05D7 \u05DE\u05D7\u05D3\u05E9 \u05DB\u05D3\u05D9 \u05DC\u05D4\u05D7\u05D9\u05DC \u05D0\u05EA \u05DB\u05D9\u05D5\u05D5\u05DF \u05D4\u05D8\u05E7\u05E1\u05D8.'
+                          : 'Please close and reopen the app to apply the text direction change.',
+                        [{ text: 'OK', style: 'default' }]
+                      );
+                    }
+                  }, 100);
+                }
+              } catch (error) {
+                console.error('Failed to change language:', error);
+                Alert.alert('Error', 'Failed to change language. Please try again.');
+              } finally {
+                setPendingLanguage(null);
+                setIsChanging(false);
+              }
             },
           },
         ]
       );
     } else {
-      await setLanguage(selectedLanguage);
-      setShowModal(false);
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      // No RTL change needed, just switch language
+      try {
+        await setLanguage(selectedLanguage);
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+        setShowModal(false);
+      } catch (error) {
+        console.error('Failed to change language:', error);
+      } finally {
+        setPendingLanguage(null);
+        setIsChanging(false);
       }
     }
   };
@@ -137,6 +204,9 @@ export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
   }));
 
   const currentConfig = LANGUAGE_CONFIG[language];
+
+  // Show restart indicator if RTL mismatch exists
+  const showRestartIndicator = needsRestart && Platform.OS !== 'web';
 
   if (variant === 'compact') {
     return (
@@ -148,6 +218,9 @@ export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
       >
         <Animated.View style={[styles.compactSelector, buttonStyle]}>
           <Text style={styles.compactFlag}>{currentConfig.flag}</Text>
+          {showRestartIndicator && (
+            <View style={styles.restartDot} />
+          )}
           <Ionicons name="chevron-down" size={14} color={COLORS.TEXT_MUTED} />
         </Animated.View>
       </TouchableOpacity>
@@ -175,6 +248,11 @@ export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
             </View>
           </View>
           <View style={styles.selectorRight}>
+            {showRestartIndicator && (
+              <View style={styles.restartBadge}>
+                <Ionicons name="refresh" size={12} color={COLORS.GAME_ORANGE} />
+              </View>
+            )}
             <Ionicons name="chevron-forward" size={20} color={COLORS.TEXT_MUTED} />
           </View>
         </Animated.View>
@@ -184,9 +262,12 @@ export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
         visible={showModal}
         transparent
         animationType="none"
-        onRequestClose={() => setShowModal(false)}
+        onRequestClose={() => !isChanging && setShowModal(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setShowModal(false)}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => !isChanging && setShowModal(false)}
+        >
           <Animated.View
             entering={SlideInDown.springify().damping(15)}
             exiting={SlideOutDown.springify().damping(15)}
@@ -215,6 +296,7 @@ export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
                         nativeName={config.nativeName}
                         isSelected={isSelected}
                         isPending={isPending}
+                        disabled={isChanging}
                         onPress={() => handleLanguageSelect(lang)}
                       />
                     );
@@ -222,11 +304,14 @@ export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
                 </View>
 
                 <View style={styles.modalFooter}>
-                  <Text style={styles.footerNote}>
-                    {language === 'he'
-                      ? '\u05E9\u05D9\u05E0\u05D5\u05D9 \u05E9\u05E4\u05D4 \u05D9\u05D7\u05D9\u05DC \u05DC\u05D0\u05D7\u05E8 \u05D4\u05E4\u05E2\u05DC\u05D4 \u05DE\u05D7\u05D3\u05E9'
-                      : 'Language change will apply after restart'}
-                  </Text>
+                  <View style={styles.footerInfoRow}>
+                    <Ionicons name="information-circle-outline" size={16} color={COLORS.TEXT_MUTED} />
+                    <Text style={styles.footerNote}>
+                      {language === 'he'
+                        ? '\u05E9\u05D9\u05E0\u05D5\u05D9 \u05DB\u05D9\u05D5\u05D5\u05DF \u05D4\u05D8\u05E7\u05E1\u05D8 \u05D3\u05D5\u05E8\u05E9 \u05D4\u05E4\u05E2\u05DC\u05D4 \u05DE\u05D7\u05D3\u05E9'
+                        : 'Changing text direction requires app restart'}
+                    </Text>
+                  </View>
                 </View>
               </LinearGradient>
             </Pressable>
@@ -243,13 +328,23 @@ interface LanguageOptionProps {
   nativeName: string;
   isSelected: boolean;
   isPending: boolean;
+  disabled?: boolean;
   onPress: () => void;
 }
 
-function LanguageOption({ flag, name, nativeName, isSelected, isPending, onPress }: LanguageOptionProps) {
+function LanguageOption({
+  flag,
+  name,
+  nativeName,
+  isSelected,
+  isPending,
+  disabled,
+  onPress,
+}: LanguageOptionProps) {
   const scale = useSharedValue(1);
 
   const handlePressIn = () => {
+    if (disabled) return;
     scale.value = withTiming(0.97, { duration: 100 });
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -262,6 +357,7 @@ function LanguageOption({ flag, name, nativeName, isSelected, isPending, onPress
 
   const optionStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
+    opacity: disabled && !isPending ? 0.5 : 1,
   }));
 
   return (
@@ -270,6 +366,7 @@ function LanguageOption({ flag, name, nativeName, isSelected, isPending, onPress
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       activeOpacity={1}
+      disabled={disabled}
     >
       <Animated.View
         style={[
@@ -303,7 +400,7 @@ function LanguageOption({ flag, name, nativeName, isSelected, isPending, onPress
           <View style={styles.optionRight}>
             {isPending ? (
               <View style={styles.pendingIndicator}>
-                <Ionicons name="time" size={20} color={COLORS.GAME_ORANGE} />
+                <Ionicons name="hourglass" size={20} color={COLORS.GAME_ORANGE} />
               </View>
             ) : isSelected ? (
               <View style={styles.checkContainer}>
@@ -334,6 +431,12 @@ const styles = StyleSheet.create({
   },
   compactFlag: {
     fontSize: 18,
+  },
+  restartDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.GAME_ORANGE,
   },
 
   // Full variant
@@ -376,7 +479,17 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_MUTED,
   },
   selectorRight: {
-    opacity: 0.7,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  restartBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 107, 0, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Modal
@@ -508,6 +621,11 @@ const styles = StyleSheet.create({
   modalFooter: {
     marginTop: 20,
     alignItems: 'center',
+  },
+  footerInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   footerNote: {
     fontSize: 12,

@@ -1,10 +1,20 @@
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, StyleSheet, Platform, I18nManager } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  Platform,
+  I18nManager,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { I18nextProvider } from 'react-i18next';
+import { I18nextProvider, useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import i18n from '../src/lib/i18n';
 import { queryClient } from '../src/lib/queryClient';
 import { useAuthStore } from '../src/store/authStore';
@@ -19,9 +29,73 @@ import { useRouter, Href } from 'expo-router';
 import { RTLProvider } from '../src/providers/RTLProvider';
 import { useRTL } from '../src/utils/rtl';
 
+/**
+ * RTL Restart Banner Component
+ * Shows when the layout direction needs a restart to apply
+ */
+function RTLRestartBanner() {
+  const { needsRestart, restartApp, acknowledgeRestart, language } = useLanguageStore();
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+
+  if (!needsRestart || Platform.OS === 'web') {
+    return null;
+  }
+
+  const isHebrew = language === 'he';
+
+  const handleRestart = async () => {
+    if (__DEV__) {
+      // In Expo Go/dev mode, we can't programmatically restart
+      // Acknowledge the restart so the banner goes away
+      // and show instructions for manual reload
+      await acknowledgeRestart();
+      Alert.alert(
+        isHebrew ? '\u05D4\u05D2\u05D3\u05E8\u05D5\u05EA \u05E0\u05E9\u05DE\u05E8\u05D5!' : 'Settings Saved!',
+        isHebrew
+          ? '\u05DB\u05D3\u05D9 \u05DC\u05D4\u05D7\u05D9\u05DC \u05D0\u05EA \u05DB\u05D9\u05D5\u05D5\u05DF \u05D4\u05D8\u05E7\u05E1\u05D8:\n\n1. \u05E0\u05E2\u05E8 \u05D0\u05EA \u05D4\u05DE\u05DB\u05E9\u05D9\u05E8\n2. \u05DC\u05D7\u05E5 \u05E2\u05DC "Reload"\n\n\u05D0\u05D5 \u05DC\u05D7\u05E5 Cmd+R (iOS) / R+R (Android)'
+          : 'To apply the text direction change:\n\n1. Shake your device\n2. Tap "Reload"\n\nOr press Cmd+R (iOS) / R+R (Android)',
+        [{ text: 'OK', style: 'default' }]
+      );
+    } else {
+      // In production, try to restart the app
+      const restarted = await restartApp();
+      if (!restarted) {
+        // If restart failed, acknowledge and show manual instructions
+        await acknowledgeRestart();
+        Alert.alert(
+          isHebrew ? '\u05E0\u05D3\u05E8\u05E9 \u05D4\u05E4\u05E2\u05DC\u05D4 \u05DE\u05D7\u05D3\u05E9' : 'Manual Restart Required',
+          isHebrew
+            ? '\u05E1\u05D2\u05D5\u05E8 \u05D0\u05EA \u05D4\u05D0\u05E4\u05DC\u05D9\u05E7\u05E6\u05D9\u05D4 \u05D5\u05E4\u05EA\u05D7 \u05DE\u05D7\u05D3\u05E9 \u05DB\u05D3\u05D9 \u05DC\u05D4\u05D7\u05D9\u05DC \u05D0\u05EA \u05DB\u05D9\u05D5\u05D5\u05DF \u05D4\u05D8\u05E7\u05E1\u05D8.'
+            : 'Please close and reopen the app to apply the text direction change.',
+          [{ text: 'OK', style: 'default' }]
+        );
+      }
+    }
+  };
+
+  return (
+    <View style={[styles.restartBanner, { paddingTop: insets.top + 8 }]}>
+      <View style={styles.restartContent}>
+        <Ionicons name="refresh-circle" size={24} color="#FFFFFF" />
+        <Text style={styles.restartText}>
+          {isHebrew
+            ? '\u05E0\u05D3\u05E8\u05E9\u05EA \u05D4\u05E4\u05E2\u05DC\u05D4 \u05DE\u05D7\u05D3\u05E9 \u05DC\u05D4\u05D7\u05DC\u05EA \u05D4\u05E9\u05D9\u05E0\u05D5\u05D9\u05D9\u05DD'
+            : 'Restart required to apply changes'}
+        </Text>
+      </View>
+      <TouchableOpacity style={styles.restartButton} onPress={handleRestart}>
+        <Text style={styles.restartButtonText}>
+          {isHebrew ? '\u05D4\u05E4\u05E2\u05DC \u05E2\u05DB\u05E9\u05D9\u05D5' : 'Restart'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 function RootLayoutInner() {
   const { isLoading, isInitialized, initialize, user } = useAuthStore();
-  const { initializeLanguage, isInitialized: isLanguageInitialized } = useLanguageStore();
+  const { initializeLanguage, isInitialized: isLanguageInitialized, language } = useLanguageStore();
   const router = useRouter();
   const { isRTL } = useRTL();
 
@@ -92,6 +166,7 @@ function RootLayoutInner() {
   return (
     <>
       <StatusBar style="light" />
+      <RTLRestartBanner />
       <Stack
         screenOptions={{
           headerStyle: {
@@ -107,8 +182,6 @@ function RootLayoutInner() {
           animation: slideAnimation,
           // Ensure proper RTL layout for headers
           headerTitleAlign: 'center',
-          // Flip back button in RTL mode
-          headerBackTitleVisible: false,
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -198,5 +271,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#111827',
+  },
+  restartBanner: {
+    backgroundColor: '#FF6B00',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  restartContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  restartText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+    flex: 1,
+  },
+  restartButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginStart: 12,
+  },
+  restartButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
