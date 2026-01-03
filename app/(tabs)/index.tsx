@@ -571,9 +571,8 @@ function QuickActionButton({
       activeOpacity={1}
       style={styles.quickActionWrapper}
     >
-      <Animated.View style={[styles.quickActionButton, buttonStyle]}>
-        <View style={[styles.quickActionGlow, { backgroundColor: color, opacity: 0.2 }]} />
-        <Ionicons name={icon as any} size={28} color={color} />
+      <Animated.View style={[styles.quickActionButton, { backgroundColor: color }, buttonStyle]}>
+        <Ionicons name={icon as any} size={28} color="#FFFFFF" />
         <Text style={styles.quickActionLabel}>{label}</Text>
       </Animated.View>
     </TouchableOpacity>
@@ -1842,20 +1841,10 @@ const styles = StyleSheet.create({
     width: (SCREEN_WIDTH - 44) / 2,
   },
   quickActionButton: {
-    backgroundColor: COLORS.DEEP_PURPLE,
     borderRadius: 16,
     paddingVertical: 20,
     alignItems: 'center',
     gap: 8,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  quickActionGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 60,
   },
   quickActionLabel: {
     fontSize: 14,
