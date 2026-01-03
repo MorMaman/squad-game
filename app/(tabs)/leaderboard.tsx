@@ -28,10 +28,18 @@ import Animated, {
   SlideInRight,
 } from 'react-native-reanimated';
 import { Avatar } from '../../src/components/Avatar';
+import {
+  CrownOverlay,
+  PowerIndicator,
+  RivalryBadge,
+} from '../../src/components';
 import { useSquadStore } from '../../src/store/squadStore';
 import { useAuthStore } from '../../src/store/authStore';
+import { usePowerStore } from '../../src/store/powerStore';
+import { useCrownStore } from '../../src/store/crownStore';
 import { supabase } from '../../src/lib/supabase';
 import { UserStats } from '../../src/types';
+import { POWER_INFO } from '../../src/types/powers';
 
 // Game Colors
 const COLORS = {
@@ -109,18 +117,28 @@ const PodiumPlace = ({
   entry,
   isCurrentUser,
   activeTab,
+  hasCrown,
+  powerType,
+  isTargeted,
+  hasRivalry,
+  isLastPlace,
 }: {
   rank: 1 | 2 | 3;
   entry: UserStats | undefined;
   isCurrentUser: boolean;
   activeTab: string;
+  hasCrown?: boolean;
+  powerType?: string | null;
+  isTargeted?: boolean;
+  hasRivalry?: boolean;
+  isLastPlace?: boolean;
 }) => {
   const scale = useSharedValue(0);
   const glowOpacity = useSharedValue(0.3);
 
   const heights = { 1: 100, 2: 75, 3: 60 };
   const delays = { 1: 200, 2: 0, 3: 400 };
-  const avatarSizes: Record<number, 'small' | 'medium' | 'large' | 'xlarge'> = { 1: 'large', 2: 'medium', 3: 'medium' };
+  const avatarSizes: Record<number, 'small' | 'medium' | 'large'> = { 1: 'large', 2: 'medium', 3: 'medium' };
 
   const podiumColors: Record<number, readonly [string, string]> = {
     1: [COLORS.GOLD, '#B8860B'] as const,
@@ -173,6 +191,7 @@ const PodiumPlace = ({
           styles.avatarContainer,
           rank === 1 && styles.firstPlaceAvatar,
           isCurrentUser && styles.currentUserAvatar,
+          hasCrown && styles.crownHolderAvatar,
           rank === 1 && glowStyle,
         ]}
       >
@@ -185,12 +204,40 @@ const PodiumPlace = ({
             />
           </View>
         )}
-        <Avatar
-          uri={entry.profile?.avatar_url}
-          name={entry.profile?.display_name}
-          size={avatarSizes[rank]}
-        />
+        {hasCrown ? (
+          <CrownOverlay size={avatarSizes[rank]}>
+            <Avatar
+              uri={entry.profile?.avatar_url}
+              name={entry.profile?.display_name}
+              size={avatarSizes[rank]}
+            />
+          </CrownOverlay>
+        ) : (
+          <Avatar
+            uri={entry.profile?.avatar_url}
+            name={entry.profile?.display_name}
+            size={avatarSizes[rank]}
+          />
+        )}
       </Animated.View>
+
+      {/* Status Indicators Row */}
+      <View style={styles.podiumIndicators}>
+        {powerType && (
+          <PowerIndicator powerType={powerType as any} size="small" />
+        )}
+        {isTargeted && (
+          <View style={styles.targetIndicator}>
+            <Ionicons name="locate" size={12} color={COLORS.CORAL} />
+          </View>
+        )}
+        {hasRivalry && <RivalryBadge size="small" />}
+        {isLastPlace && (
+          <View style={styles.underdogIndicator}>
+            <Ionicons name="flash" size={12} color="#FF6B00" />
+          </View>
+        )}
+      </View>
 
       <Text style={styles.podiumName} numberOfLines={1}>
         {entry.profile?.display_name}
@@ -218,6 +265,11 @@ const LeaderboardRow = ({
   previousRank,
   activeTab,
   onPress,
+  hasCrown,
+  powerType,
+  isTargeted,
+  hasRivalry,
+  isLastPlace,
 }: {
   entry: UserStats;
   rank: number;
@@ -225,6 +277,11 @@ const LeaderboardRow = ({
   previousRank?: number;
   activeTab: string;
   onPress: () => void;
+  hasCrown?: boolean;
+  powerType?: string | null;
+  isTargeted?: boolean;
+  hasRivalry?: boolean;
+  isLastPlace?: boolean;
 }) => {
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0.5);
@@ -284,25 +341,56 @@ const LeaderboardRow = ({
           </Text>
         </View>
 
-        <Avatar
-          uri={entry.profile?.avatar_url}
-          name={entry.profile?.display_name}
-          size="small"
-        />
+        <View style={[styles.rowAvatarWrapper, hasCrown && styles.crownHolderRowAvatar]}>
+          {hasCrown ? (
+            <CrownOverlay size="small">
+              <Avatar
+                uri={entry.profile?.avatar_url}
+                name={entry.profile?.display_name}
+                size="small"
+              />
+            </CrownOverlay>
+          ) : (
+            <Avatar
+              uri={entry.profile?.avatar_url}
+              name={entry.profile?.display_name}
+              size="small"
+            />
+          )}
+        </View>
 
         <View style={styles.playerInfo}>
-          <Text style={styles.playerName} numberOfLines={1}>
-            {entry.profile?.display_name}
-            {isCurrentUser && (
-              <Text style={styles.youBadge}> (You)</Text>
+          <View style={styles.playerNameRow}>
+            <Text style={styles.playerName} numberOfLines={1}>
+              {entry.profile?.display_name}
+              {isCurrentUser && (
+                <Text style={styles.youBadge}> (You)</Text>
+              )}
+            </Text>
+          </View>
+          {/* Status indicators */}
+          <View style={styles.rowIndicators}>
+            {powerType && (
+              <PowerIndicator powerType={powerType as any} size="tiny" />
             )}
-          </Text>
-          {entry.strikes_14d > 0 && (
-            <View style={styles.strikesBadge}>
-              <Ionicons name="warning" size={10} color={COLORS.CORAL} />
-              <Text style={styles.strikesText}>{entry.strikes_14d}</Text>
-            </View>
-          )}
+            {isTargeted && (
+              <View style={styles.targetIndicatorSmall}>
+                <Ionicons name="locate" size={10} color={COLORS.CORAL} />
+              </View>
+            )}
+            {hasRivalry && <RivalryBadge size="tiny" />}
+            {isLastPlace && (
+              <View style={styles.underdogIndicatorSmall}>
+                <Ionicons name="flash" size={10} color="#FF6B00" />
+              </View>
+            )}
+            {entry.strikes_14d > 0 && (
+              <View style={styles.strikesBadge}>
+                <Ionicons name="warning" size={10} color={COLORS.CORAL} />
+                <Text style={styles.strikesText}>{entry.strikes_14d}</Text>
+              </View>
+            )}
+          </View>
         </View>
 
         <View style={styles.scoreContainer}>
@@ -371,6 +459,8 @@ export default function LeaderboardScreen() {
 
   const { currentSquad } = useSquadStore();
   const { user } = useAuthStore();
+  const { activePowers, activeTargets, fetchActivePowers, fetchActiveTargets } = usePowerStore();
+  const { currentCrown, activeRivalry, fetchCrownData } = useCrownStore();
 
   const indicatorPosition = useSharedValue(1);
   const headerScale = useSharedValue(0);
@@ -390,6 +480,28 @@ export default function LeaderboardScreen() {
     ? (activeTab === 'weekly' ? nextRankStats.points_weekly : nextRankStats.streak_count) -
       (activeTab === 'weekly' ? currentUserStats?.points_weekly || 0 : currentUserStats?.streak_count || 0)
     : 0;
+
+  // Helper functions for indicators
+  const hasCrown = (userId: string) => currentCrown?.user_id === userId;
+
+  const getUserPower = (userId: string) => {
+    const power = activePowers.find(p => p.user_id === userId);
+    return power?.power_type || null;
+  };
+
+  const isUserTargeted = (userId: string) => {
+    return activeTargets.some(t => t.target_id === userId);
+  };
+
+  const hasRivalry = (userId: string) => {
+    if (!activeRivalry) return false;
+    return activeRivalry.rival1_id === userId || activeRivalry.rival2_id === userId;
+  };
+
+  const isLastPlace = (userId: string) => {
+    if (stats.length === 0) return false;
+    return stats[stats.length - 1]?.user_id === userId;
+  };
 
   const fetchLeaderboard = async () => {
     if (!currentSquad) return;
@@ -420,6 +532,11 @@ export default function LeaderboardScreen() {
 
   useEffect(() => {
     fetchLeaderboard();
+    if (currentSquad) {
+      fetchActivePowers(currentSquad.id);
+      fetchActiveTargets(currentSquad.id);
+      fetchCrownData(currentSquad.id);
+    }
   }, [currentSquad, activeTab, timeframe]);
 
   useEffect(() => {
@@ -499,6 +616,11 @@ export default function LeaderboardScreen() {
       isCurrentUser={item.user_id === user?.id}
       activeTab={activeTab}
       onPress={() => {}}
+      hasCrown={hasCrown(item.user_id)}
+      powerType={getUserPower(item.user_id)}
+      isTargeted={isUserTargeted(item.user_id)}
+      hasRivalry={hasRivalry(item.user_id)}
+      isLastPlace={isLastPlace(item.user_id)}
     />
   );
 
@@ -570,18 +692,33 @@ export default function LeaderboardScreen() {
             entry={top3[1]}
             isCurrentUser={top3[1]?.user_id === user?.id}
             activeTab={activeTab}
+            hasCrown={top3[1] && hasCrown(top3[1].user_id)}
+            powerType={top3[1] && getUserPower(top3[1].user_id)}
+            isTargeted={top3[1] && isUserTargeted(top3[1].user_id)}
+            hasRivalry={top3[1] && hasRivalry(top3[1].user_id)}
+            isLastPlace={top3[1] && isLastPlace(top3[1].user_id)}
           />
           <PodiumPlace
             rank={1}
             entry={top3[0]}
             isCurrentUser={top3[0]?.user_id === user?.id}
             activeTab={activeTab}
+            hasCrown={top3[0] && hasCrown(top3[0].user_id)}
+            powerType={top3[0] && getUserPower(top3[0].user_id)}
+            isTargeted={top3[0] && isUserTargeted(top3[0].user_id)}
+            hasRivalry={top3[0] && hasRivalry(top3[0].user_id)}
+            isLastPlace={top3[0] && isLastPlace(top3[0].user_id)}
           />
           <PodiumPlace
             rank={3}
             entry={top3[2]}
             isCurrentUser={top3[2]?.user_id === user?.id}
             activeTab={activeTab}
+            hasCrown={top3[2] && hasCrown(top3[2].user_id)}
+            powerType={top3[2] && getUserPower(top3[2].user_id)}
+            isTargeted={top3[2] && isUserTargeted(top3[2].user_id)}
+            hasRivalry={top3[2] && hasRivalry(top3[2].user_id)}
+            isLastPlace={top3[2] && isLastPlace(top3[2].user_id)}
           />
         </Animated.View>
       )}
@@ -808,6 +945,39 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 2,
   },
+  crownHolderAvatar: {
+    shadowColor: COLORS.GOLD,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 15,
+    elevation: 10,
+  },
+  avatarWrapper: {
+    position: 'relative',
+  },
+  podiumIndicators: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+    minHeight: 20,
+  },
+  targetIndicator: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 71, 87, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  underdogIndicator: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 107, 0, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   crownBadge: {
     position: 'absolute',
     top: -12,
@@ -921,9 +1091,23 @@ const styles = StyleSheet.create({
     opacity: 1,
     color: COLORS.CYAN,
   },
+  rowAvatarWrapper: {
+    position: 'relative',
+  },
+  crownHolderRowAvatar: {
+    shadowColor: COLORS.GOLD,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    elevation: 5,
+  },
   playerInfo: {
     flex: 1,
     marginLeft: 12,
+  },
+  playerNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   playerName: {
     fontSize: 14,
@@ -933,6 +1117,28 @@ const styles = StyleSheet.create({
   youBadge: {
     color: COLORS.PURPLE,
     fontWeight: '500',
+  },
+  rowIndicators: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  targetIndicatorSmall: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 71, 87, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  underdogIndicatorSmall: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 107, 0, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   strikesBadge: {
     flexDirection: 'row',

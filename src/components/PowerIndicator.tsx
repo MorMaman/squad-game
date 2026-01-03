@@ -25,7 +25,7 @@ interface PowerIndicatorProps {
   /** The type of underdog power */
   powerType: UnderdogPowerType;
   /** Size variant */
-  size?: 'small' | 'medium';
+  size?: 'tiny' | 'small' | 'medium';
   /** Whether this indicator is on the target (for target_lock) */
   isTarget?: boolean;
   /** Show tooltip on press (for target indicator) */
@@ -34,6 +34,11 @@ interface PowerIndicatorProps {
 
 // Size configurations
 const SIZE_CONFIG = {
+  tiny: {
+    container: { height: 16, paddingHorizontal: 4, borderRadius: 8 },
+    icon: 10,
+    text: 8,
+  },
   small: {
     container: { height: 20, paddingHorizontal: 6, borderRadius: 10 },
     icon: 12,

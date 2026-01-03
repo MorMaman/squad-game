@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../theme/colors';
 
 interface RivalryBadgeProps {
-  size?: 'small' | 'medium';
+  size?: 'tiny' | 'small' | 'medium';
 }
 
 // Rivalry colors - competitive red/orange scheme
@@ -23,6 +23,7 @@ const rivalryColors = {
 };
 
 const sizes = {
+  tiny: { iconSize: 10, fontSize: 8, padding: 2, minWidth: 20 },
   small: { iconSize: 14, fontSize: typography.sizeXs, padding: spacing.xs, minWidth: 28 },
   medium: { iconSize: 20, fontSize: typography.sizeSm, padding: spacing.sm, minWidth: 48 },
 };

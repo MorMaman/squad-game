@@ -1,8 +1,4 @@
 # Supabase Project Configuration
-# Copy to supabase/config.toml
-
-[project]
-id = "your-project-ref"
 
 [db]
 port = 54322
@@ -38,54 +34,5 @@ enable_confirmations = false
 enable_signup = false
 
 # Edge Functions
-[functions]
+[functions.verify_jwt]
 verify_jwt = true
-
-# Scheduled Functions (Cron Jobs)
-# These need to be configured in the Supabase Dashboard
-# Dashboard -> Database -> Extensions -> Enable pg_cron
-# Dashboard -> SQL Editor -> Create the following:
-
-# -- Generate daily events at 1 AM UTC
-# SELECT cron.schedule(
-#   'generate-daily-events',
-#   '0 1 * * *',
-#   $$SELECT net.http_post(
-#     url:='https://YOUR_PROJECT_REF.supabase.co/functions/v1/generate-daily-events',
-#     headers:='{"Content-Type": "application/json", "Authorization": "Bearer YOUR_CRON_SECRET"}'::jsonb,
-#     body:='{}'::jsonb
-#   )$$
-# );
-
-# -- Check for events to open every minute
-# SELECT cron.schedule(
-#   'open-events',
-#   '* * * * *',
-#   $$SELECT net.http_post(
-#     url:='https://YOUR_PROJECT_REF.supabase.co/functions/v1/open-events',
-#     headers:='{"Content-Type": "application/json", "Authorization": "Bearer YOUR_CRON_SECRET"}'::jsonb,
-#     body:='{}'::jsonb
-#   )$$
-# );
-
-# -- Check for events to close every minute
-# SELECT cron.schedule(
-#   'close-events',
-#   '* * * * *',
-#   $$SELECT net.http_post(
-#     url:='https://YOUR_PROJECT_REF.supabase.co/functions/v1/close-events',
-#     headers:='{"Content-Type": "application/json", "Authorization": "Bearer YOUR_CRON_SECRET"}'::jsonb,
-#     body:='{}'::jsonb
-#   )$$
-# );
-
-# -- Weekly reset every Monday at midnight UTC
-# SELECT cron.schedule(
-#   'weekly-reset',
-#   '0 0 * * 1',
-#   $$SELECT net.http_post(
-#     url:='https://YOUR_PROJECT_REF.supabase.co/functions/v1/weekly-reset',
-#     headers:='{"Content-Type": "application/json", "Authorization": "Bearer YOUR_CRON_SECRET"}'::jsonb,
-#     body:='{}'::jsonb
-#   )$$
-# );
