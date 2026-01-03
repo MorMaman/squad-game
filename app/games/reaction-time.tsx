@@ -17,6 +17,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
+import { useGameSounds } from '../../src/hooks/useGameSounds';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -50,18 +52,23 @@ interface RoundResult {
 
 export default function ReactionTimeGame() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { playSound, initAudio } = useGameSounds();
   const [phase, setPhase] = useState<GamePhase>('ready');
   const [round, setRound] = useState(1);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [currentTime, setCurrentTime] = useState<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hapticIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const pulseScale = useSharedValue(1);
   const circleScale = useSharedValue(1);
 
+  // Continuous haptic feedback during waiting phase
   useEffect(() => {
     if (phase === 'waiting') {
+      // Start pulsing animation
       pulseScale.value = withRepeat(
         withSequence(
           withTiming(1.1, { duration: 500 }),
@@ -69,9 +76,30 @@ export default function ReactionTimeGame() {
         ),
         -1
       );
+
+      // Start continuous haptic feedback (light pulse every 500ms)
+      if (Platform.OS !== 'web') {
+        hapticIntervalRef.current = setInterval(() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }, 500);
+      }
     } else {
       pulseScale.value = 1;
+
+      // Stop haptic feedback
+      if (hapticIntervalRef.current) {
+        clearInterval(hapticIntervalRef.current);
+        hapticIntervalRef.current = null;
+      }
     }
+
+    // Cleanup on unmount
+    return () => {
+      if (hapticIntervalRef.current) {
+        clearInterval(hapticIntervalRef.current);
+        hapticIntervalRef.current = null;
+      }
+    };
   }, [phase]);
 
   const pulseStyle = useAnimatedStyle(() => ({
@@ -79,8 +107,10 @@ export default function ReactionTimeGame() {
   }));
 
   const startRound = () => {
+    initAudio(); // Initialize audio on user interaction
     setPhase('waiting');
     setCurrentTime(null);
+    playSound('tick'); // Sound when starting
 
     // Random delay between 2-5 seconds
     const delay = 2000 + Math.random() * 3000;
@@ -88,6 +118,7 @@ export default function ReactionTimeGame() {
     timeoutRef.current = setTimeout(() => {
       setPhase('go');
       startTimeRef.current = Date.now();
+      playSound('go'); // GO sound
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       }
@@ -105,6 +136,7 @@ export default function ReactionTimeGame() {
         clearTimeout(timeoutRef.current);
       }
       setPhase('tooEarly');
+      playSound('wrong'); // Wrong sound for too early
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
@@ -116,12 +148,14 @@ export default function ReactionTimeGame() {
           startRound();
         } else {
           setPhase('results');
+          playSound('success'); // Results sound
         }
       }, 1500);
     } else if (phase === 'go') {
       const reactionTime = Date.now() - startTimeRef.current;
       setCurrentTime(reactionTime);
       setPhase('tapped');
+      playSound('correct'); // Correct tap sound
 
       if (Platform.OS !== 'web') {
         if (reactionTime < 300) {
@@ -139,6 +173,7 @@ export default function ReactionTimeGame() {
           startRound();
         } else {
           setPhase('results');
+          playSound('success'); // Results sound
         }
       }, 1500);
     }
@@ -152,10 +187,10 @@ export default function ReactionTimeGame() {
   };
 
   const getTimeRating = (time: number) => {
-    if (time < 200) return 'LIGHTNING!';
-    if (time < 300) return 'QUICK!';
-    if (time < 400) return 'GOOD!';
-    return 'KEEP TRYING';
+    if (time < 200) return t('games.reactionTime.ratings.lightning');
+    if (time < 300) return t('games.reactionTime.ratings.quick');
+    if (time < 400) return t('games.reactionTime.ratings.good');
+    return t('games.reactionTime.ratings.keepTrying');
   };
 
   const calculateAverage = () => {
@@ -200,7 +235,7 @@ export default function ReactionTimeGame() {
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.title}>
-            {phase === 'results' ? 'Results' : `Round ${round}/5`}
+            {phase === 'results' ? t('games.reactionTime.results') : `${t('games.reactionTime.round')} ${round}/5`}
           </Text>
           <View style={styles.backButton} />
         </View>
@@ -214,16 +249,16 @@ export default function ReactionTimeGame() {
           {phase === 'ready' && (
             <Animated.View entering={FadeIn} style={styles.readyContainer}>
               <Ionicons name="flash" size={64} color={COLORS.gold} />
-              <Text style={styles.readyTitle}>Reaction Time</Text>
+              <Text style={styles.readyTitle}>{t('games.reactionTime.title')}</Text>
               <Text style={styles.readySubtitle}>
-                Tap as fast as you can when the circle turns green!
+                {t('games.reactionTime.instructions')}
               </Text>
               <TouchableOpacity style={styles.startButton} onPress={startRound}>
                 <LinearGradient
                   colors={[COLORS.go, '#10B981']}
                   style={styles.startGradient}
                 >
-                  <Text style={styles.startText}>START</Text>
+                  <Text style={styles.startText}>{t('games.reactionTime.start')}</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </Animated.View>
@@ -239,10 +274,10 @@ export default function ReactionTimeGame() {
                 ]}
               >
                 {phase === 'waiting' && (
-                  <Text style={styles.circleText}>Wait...</Text>
+                  <Text style={styles.circleText}>{t('games.reactionTime.wait')}</Text>
                 )}
                 {phase === 'go' && (
-                  <Text style={styles.circleText}>TAP!</Text>
+                  <Text style={styles.circleText}>{t('games.reactionTime.tap')}</Text>
                 )}
                 {phase === 'tapped' && currentTime && (
                   <>
@@ -255,7 +290,7 @@ export default function ReactionTimeGame() {
                 {phase === 'tooEarly' && (
                   <>
                     <Ionicons name="close-circle" size={48} color={COLORS.textPrimary} />
-                    <Text style={styles.tooEarlyText}>Too Early!</Text>
+                    <Text style={styles.tooEarlyText}>{t('games.reactionTime.tooEarly')}</Text>
                   </>
                 )}
               </Animated.View>
@@ -268,9 +303,9 @@ export default function ReactionTimeGame() {
                 {calculateAverage() && calculateAverage()! < 300 ? '⚡' : '🎯'}
               </Text>
               <Text style={styles.resultsTitle}>
-                {calculateAverage() ? `${calculateAverage()}ms` : 'No valid times'}
+                {calculateAverage() ? `${calculateAverage()}ms` : t('games.reactionTime.noValidTimes')}
               </Text>
-              <Text style={styles.resultsSubtitle}>Average Reaction Time</Text>
+              <Text style={styles.resultsSubtitle}>{t('games.reactionTime.averageReactionTime')}</Text>
 
               <View style={styles.roundResults}>
                 {results.map((result, index) => (
@@ -283,7 +318,7 @@ export default function ReactionTimeGame() {
                         result.time ? { color: getTimeColor(result.time) } : null,
                       ]}
                     >
-                      {result.tooEarly ? 'FAIL' : `${result.time}ms`}
+                      {result.tooEarly ? t('games.reactionTime.fail') : `${result.time}ms`}
                     </Text>
                   </View>
                 ))}
@@ -295,11 +330,11 @@ export default function ReactionTimeGame() {
                     colors={[COLORS.go, '#10B981']}
                     style={styles.playAgainGradient}
                   >
-                    <Text style={styles.playAgainText}>Play Again</Text>
+                    <Text style={styles.playAgainText}>{t('games.reactionTime.playAgain')}</Text>
                   </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.exitButton} onPress={() => router.back()}>
-                  <Text style={styles.exitButtonText}>Exit</Text>
+                  <Text style={styles.exitButtonText}>{t('games.reactionTime.exit')}</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>

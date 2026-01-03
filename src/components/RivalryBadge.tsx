@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../theme/colors';
+import { useTranslation } from 'react-i18next';
 
 interface RivalryBadgeProps {
   size?: 'tiny' | 'small' | 'medium';
@@ -30,6 +31,7 @@ const sizes = {
 
 export function RivalryBadge({ size = 'medium' }: RivalryBadgeProps) {
   const sizeConfig = sizes[size];
+  const { t } = useTranslation();
 
   // Animation values for pulsing effect
   const scale = useSharedValue(1);
@@ -135,7 +137,7 @@ export function RivalryBadge({ size = 'medium' }: RivalryBadgeProps) {
         {/* Text label for medium size */}
         {size === 'medium' && (
           <Text style={[styles.labelText, { fontSize: sizeConfig.fontSize }]}>
-            RIVAL
+            {t('badges.rival')}
           </Text>
         )}
       </View>

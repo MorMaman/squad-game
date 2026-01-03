@@ -17,6 +17,8 @@ import { useRouter, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
+import { useGameSounds } from '../../src/hooks/useGameSounds';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -130,6 +132,8 @@ function GameCard({
 export default function MemoryMatchGame() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { t } = useTranslation();
+  const { playSound, initAudio } = useGameSounds();
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -193,6 +197,7 @@ export default function MemoryMatchGame() {
 
       if (firstCard.emoji === secondCard.emoji) {
         // Match found!
+        playSound('match'); // Match sound
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
@@ -210,6 +215,7 @@ export default function MemoryMatchGame() {
         }, 500);
       } else {
         // No match
+        playSound('wrong'); // Wrong sound
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
@@ -234,6 +240,7 @@ export default function MemoryMatchGame() {
   useEffect(() => {
     if (matches === CARD_EMOJIS.length && matches > 0) {
       setGameComplete(true);
+      playSound('success'); // Victory sound
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
@@ -243,10 +250,12 @@ export default function MemoryMatchGame() {
   const handleCardPress = (index: number) => {
     if (!gameStarted) {
       setGameStarted(true);
+      initAudio(); // Initialize audio on first interaction
     }
 
     if (isChecking || flippedCards.length >= 2) return;
 
+    playSound('flip'); // Card flip sound
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -273,7 +282,7 @@ export default function MemoryMatchGame() {
           <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.title}>Memory Match</Text>
+          <Text style={styles.title}>{t('games.memoryMatch.title')}</Text>
           <TouchableOpacity onPress={initializeGame} style={styles.resetButton}>
             <Ionicons name="refresh" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
@@ -287,7 +296,7 @@ export default function MemoryMatchGame() {
           </View>
           <View style={styles.statItem}>
             <Ionicons name="swap-horizontal" size={20} color={COLORS.gradientEnd} />
-            <Text style={styles.statValue}>{moves} moves</Text>
+            <Text style={styles.statValue}>{moves} {t('games.memoryMatch.moves')}</Text>
           </View>
           <View style={styles.statItem}>
             <Ionicons name="checkmark-circle" size={20} color={COLORS.matched} />
@@ -314,9 +323,9 @@ export default function MemoryMatchGame() {
           <Animated.View entering={FadeIn} style={styles.victoryOverlay}>
             <Animated.View entering={FadeInDown.delay(200)} style={styles.victoryCard}>
               <Text style={styles.victoryEmoji}>🎉</Text>
-              <Text style={styles.victoryTitle}>Amazing!</Text>
+              <Text style={styles.victoryTitle}>{t('games.memoryMatch.congratulations')}</Text>
               <Text style={styles.victorySubtitle}>
-                Completed in {formatTime(timer)} with {moves} moves
+                {formatTime(timer)} • {moves} {t('games.memoryMatch.moves')}
               </Text>
               <View style={styles.victoryButtons}>
                 <TouchableOpacity
@@ -327,14 +336,14 @@ export default function MemoryMatchGame() {
                     colors={[COLORS.gradientStart, COLORS.gradientEnd]}
                     style={styles.playAgainGradient}
                   >
-                    <Text style={styles.playAgainText}>Play Again</Text>
+                    <Text style={styles.playAgainText}>{t('games.memoryMatch.playAgain')}</Text>
                   </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.exitButton}
                   onPress={handleGoBack}
                 >
-                  <Text style={styles.exitButtonText}>Exit</Text>
+                  <Text style={styles.exitButtonText}>{t('games.memoryMatch.exit')}</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>

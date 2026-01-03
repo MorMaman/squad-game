@@ -23,6 +23,7 @@ import { colors, typography, spacing, borderRadius } from '../theme/colors';
 import { GAME_COLORS, GAME_SPRINGS } from '../theme/gameColors';
 import { useRTL, flipStyle } from '../utils/rtl';
 import { RTLView, RTLIcon } from './RTLView';
+import { useTranslation } from 'react-i18next';
 
 // Underdog power types
 export type UnderdogPowerType = 'double_chance' | 'target_lock' | 'chaos_card' | 'streak_shield';
@@ -38,32 +39,20 @@ interface UnderdogPowerBadgeProps {
   showLabel?: boolean;
 }
 
-// Power type configurations
-const POWER_CONFIG: Record<UnderdogPowerType, {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  description: string;
-}> = {
-  double_chance: {
-    icon: 'copy-outline',
-    label: 'Double Chance',
-    description: 'Two attempts at the challenge',
-  },
-  target_lock: {
-    icon: 'locate-outline',
-    label: 'Target Lock',
-    description: 'Lock onto a leader',
-  },
-  chaos_card: {
-    icon: 'shuffle-outline',
-    label: 'Chaos Card',
-    description: 'Random rule modification',
-  },
-  streak_shield: {
-    icon: 'shield-outline',
-    label: 'Streak Shield',
-    description: 'Protect your streak',
-  },
+// Power type configurations - icons only, labels come from translations
+const POWER_ICONS: Record<UnderdogPowerType, keyof typeof Ionicons.glyphMap> = {
+  double_chance: 'copy-outline',
+  target_lock: 'locate-outline',
+  chaos_card: 'shuffle-outline',
+  streak_shield: 'shield-outline',
+};
+
+// Translation keys for power types
+const POWER_TRANSLATION_KEYS: Record<UnderdogPowerType, { label: string; description: string }> = {
+  double_chance: { label: 'underdogPowers.doubleChance', description: 'underdogPowers.doubleChanceDesc' },
+  target_lock: { label: 'underdogPowers.targetLock', description: 'underdogPowers.targetLockDesc' },
+  chaos_card: { label: 'underdogPowers.chaosCard', description: 'underdogPowers.chaosCardDesc' },
+  streak_shield: { label: 'underdogPowers.streakShield', description: 'underdogPowers.streakShieldDesc' },
 };
 
 export function UnderdogPowerBadge({
@@ -73,8 +62,11 @@ export function UnderdogPowerBadge({
   showLabel = true,
 }: UnderdogPowerBadgeProps) {
   const [timeLeft, setTimeLeft] = useState<number>(0);
-  const config = POWER_CONFIG[powerType];
+  const { t } = useTranslation();
   const { isRTL } = useRTL();
+
+  const icon = POWER_ICONS[powerType];
+  const translationKeys = POWER_TRANSLATION_KEYS[powerType];
 
   // Animation values
   const glowPulse = useSharedValue(0);
@@ -128,7 +120,7 @@ export function UnderdogPowerBadge({
 
   // Format time remaining
   const formatTimeLeft = () => {
-    if (timeLeft <= 0) return 'EXPIRED';
+    if (timeLeft <= 0) return t('underdogPowers.expired');
 
     const totalSeconds = Math.floor(timeLeft / 1000);
     const hours = Math.floor(totalSeconds / 3600);
@@ -203,7 +195,7 @@ export function UnderdogPowerBadge({
           <Animated.View style={[styles.iconContainer, animatedIconStyle]}>
             <View style={styles.iconBackground}>
               <Ionicons
-                name={config.icon}
+                name={icon}
                 size={28}
                 color={colors.textPrimary}
               />
@@ -216,12 +208,12 @@ export function UnderdogPowerBadge({
               <Text style={[
                 styles.activeLabel,
                 isRTL && styles.textRTL
-              ]}>UNDERDOG ACTIVE</Text>
+              ]}>{t('underdogPowers.active')}</Text>
             )}
             <Text style={[
               styles.powerName,
               isRTL && styles.textRTL
-            ]}>{config.label}</Text>
+            ]}>{t(translationKeys.label)}</Text>
             <RTLView row style={styles.timerContainer}>
               <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
               <Text style={styles.timerText}>{formatTimeLeft()}</Text>

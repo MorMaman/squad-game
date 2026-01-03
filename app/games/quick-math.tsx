@@ -24,6 +24,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
+import { useGameSounds } from '../../src/hooks/useGameSounds';
 import { Button } from '../../src/components/Button';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -249,6 +251,8 @@ const AnswerButton = ({
 
 export default function QuickMathScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { playSound, initAudio } = useGameSounds();
   const [phase, setPhase] = useState<Phase>('ready');
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -402,6 +406,7 @@ export default function QuickMathScreen() {
   useEffect(() => {
     if (streak > 0 && streak % STREAK_MILESTONE === 0) {
       // Streak milestone celebration
+      playSound('levelUp'); // Level up sound
       if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       streakFlame.value = withRepeat(
         withSequence(
@@ -422,6 +427,7 @@ export default function QuickMathScreen() {
 
       // Show level up animation
       setShowLevelUp(true);
+      playSound('levelUp'); // Level up sound
       if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       levelUpScale.value = 0.5;
@@ -448,6 +454,7 @@ export default function QuickMathScreen() {
       countdownScale.value = 0;
       countdownOpacity.value = 1;
 
+      playSound('countdown'); // Countdown beep
       if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
       countdownScale.value = withSpring(1, { damping: 12, stiffness: 100 });
@@ -464,6 +471,7 @@ export default function QuickMathScreen() {
           setCountdownValue(0);
           countdownScale.value = 0;
           countdownOpacity.value = 1;
+          playSound('go'); // GO sound
           if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
           countdownScale.value = withSpring(1.2, { damping: 10, stiffness: 100 });
@@ -512,6 +520,7 @@ export default function QuickMathScreen() {
 
     if (correct) {
       // Correct answer
+      playSound('correct'); // Correct answer sound
       if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       const pointsEarned = BASE_POINTS + (wasQuick ? SPEED_BONUS : 0);
@@ -554,6 +563,7 @@ export default function QuickMathScreen() {
 
     } else {
       // Wrong answer
+      playSound('wrong'); // Wrong answer sound
       if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setStreak(0);
 
@@ -582,6 +592,7 @@ export default function QuickMathScreen() {
   }, [currentQuestion, selectedAnswer, phase, generateNextQuestion, bestStreak]);
 
   const endGame = () => {
+    playSound('gameOver'); // Game over sound
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setPhase('result');
 
@@ -590,6 +601,7 @@ export default function QuickMathScreen() {
   };
 
   const handleStartGame = () => {
+    initAudio(); // Initialize audio on first interaction
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     setPhase('countdown');
     setScore(0);
@@ -687,9 +699,9 @@ export default function QuickMathScreen() {
             </LinearGradient>
           </View>
 
-          <Text style={styles.readyTitle}>QUICK MATH</Text>
+          <Text style={styles.readyTitle}>{t('games.quickMath.title').toUpperCase()}</Text>
           <Text style={styles.readySubtitle}>
-            Solve as many equations as you can in 60 seconds!
+            {t('games.quickMath.instructions')}
           </Text>
 
           <View style={styles.rulesContainer}>
@@ -735,7 +747,7 @@ export default function QuickMathScreen() {
               end={{ x: 1, y: 0 }}
             >
               <Ionicons name="play" size={28} color="#fff" />
-              <Text style={styles.startButtonText}>START GAME</Text>
+              <Text style={styles.startButtonText}>{t('game.startGame').toUpperCase()}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -746,7 +758,7 @@ export default function QuickMathScreen() {
         <View style={styles.countdownContainer}>
           <Animated.View style={[styles.countdownNumber, countdownAnimStyle]}>
             <Text style={styles.countdownText}>
-              {countdownValue === 0 ? 'GO!' : countdownValue}
+              {countdownValue === 0 ? t('game.go') : countdownValue}
             </Text>
           </Animated.View>
         </View>
@@ -873,7 +885,7 @@ export default function QuickMathScreen() {
 
             <View style={styles.resultScoreContainer}>
               <Text style={styles.resultScoreNumber}>{score}</Text>
-              <Text style={styles.resultScoreLabel}>POINTS</Text>
+              <Text style={styles.resultScoreLabel}>{t('game.points').toUpperCase()}</Text>
             </View>
 
             <View style={styles.resultStatsGrid}>
@@ -882,7 +894,7 @@ export default function QuickMathScreen() {
                   <Ionicons name="checkmark-circle" size={24} color={COLORS.correct} />
                 </View>
                 <Text style={styles.resultStatValue}>{correctAnswers}</Text>
-                <Text style={styles.resultStatLabel}>Correct</Text>
+                <Text style={styles.resultStatLabel}>{t('games.quickMath.correct')}</Text>
               </View>
 
               <View style={styles.resultStatDivider} />
@@ -892,7 +904,7 @@ export default function QuickMathScreen() {
                   <Ionicons name="analytics" size={24} color={COLORS.cyan} />
                 </View>
                 <Text style={styles.resultStatValue}>{getAccuracy()}%</Text>
-                <Text style={styles.resultStatLabel}>Accuracy</Text>
+                <Text style={styles.resultStatLabel}>{t('profile.statistics')}</Text>
               </View>
 
               <View style={styles.resultStatDivider} />
@@ -902,7 +914,7 @@ export default function QuickMathScreen() {
                   <Text style={styles.streakEmoji}>!</Text>
                 </View>
                 <Text style={styles.resultStatValue}>{bestStreak}</Text>
-                <Text style={styles.resultStatLabel}>Best Streak</Text>
+                <Text style={styles.resultStatLabel}>{t('profile.bestStreak')}</Text>
               </View>
             </View>
 
@@ -916,7 +928,7 @@ export default function QuickMathScreen() {
             )}
 
             <Button
-              title={phase === 'submitting' ? 'Submitting...' : 'SUBMIT SCORE'}
+              title={phase === 'submitting' ? t('common.loading') : t('common.save').toUpperCase()}
               onPress={handleSubmit}
               loading={phase === 'submitting'}
               size="large"
@@ -928,7 +940,7 @@ export default function QuickMathScreen() {
               onPress={handleStartGame}
               disabled={phase === 'submitting'}
             >
-              <Text style={styles.playAgainText}>Play Again</Text>
+              <Text style={styles.playAgainText}>{t('games.quickMath.playAgain')}</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>

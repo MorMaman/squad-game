@@ -30,6 +30,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
+import { useGameSounds } from '../../src/hooks/useGameSounds';
 import { Button } from '../../src/components/Button';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -85,6 +87,8 @@ function generateRound(): GameRound {
 
 export default function ColorMatchScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { playSound, initAudio } = useGameSounds();
   const [phase, setPhase] = useState<Phase>('ready');
   const [currentRound, setCurrentRound] = useState<GameRound>(generateRound());
   const [score, setScore] = useState(0);
@@ -223,6 +227,7 @@ export default function ColorMatchScreen() {
       countdownScale.value = 0;
       countdownOpacity.value = 1;
 
+      playSound('countdown'); // Countdown beep
       if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
       countdownScale.value = withSpring(1, { damping: 12, stiffness: 100 });
@@ -239,6 +244,7 @@ export default function ColorMatchScreen() {
           setCountdownValue(0);
           countdownScale.value = 0;
           countdownOpacity.value = 1;
+          playSound('go'); // GO sound
           if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
           countdownScale.value = withSpring(1.2, { damping: 10, stiffness: 100 });
@@ -352,6 +358,7 @@ export default function ColorMatchScreen() {
       const hasSpeedBonus = answerTime < SPEED_BONUS_THRESHOLD;
 
       if (isCorrect) {
+        playSound('correct'); // Correct answer sound
         if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         const newStreak = streak + 1;
         setStreak(newStreak);
@@ -365,6 +372,7 @@ export default function ColorMatchScreen() {
 
         // Check for streak milestone
         if (STREAK_MILESTONES.includes(newStreak)) {
+          playSound('levelUp'); // Streak milestone sound
           triggerStreakMilestone(newStreak);
         } else {
           // Streak counter animation
@@ -374,6 +382,7 @@ export default function ColorMatchScreen() {
           );
         }
       } else {
+        playSound('wrong'); // Wrong answer sound
         if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setStreak(0);
         setWrongCount((w) => w + 1);
@@ -385,6 +394,7 @@ export default function ColorMatchScreen() {
   );
 
   const endGame = () => {
+    playSound('gameOver'); // Game over sound
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setPhase('result');
 
@@ -408,6 +418,7 @@ export default function ColorMatchScreen() {
   };
 
   const handleStartGame = () => {
+    initAudio(); // Initialize audio on first interaction
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     setPhase('countdown');
     setScore(0);
@@ -474,9 +485,9 @@ export default function ColorMatchScreen() {
               </LinearGradient>
             </View>
 
-            <Text style={styles.readyTitle}>COLOR MATCH</Text>
+            <Text style={styles.readyTitle}>{t('games.colorMatch.title').toUpperCase()}</Text>
             <Text style={styles.readySubtitle}>
-              Tap the button matching the WORD,{'\n'}not the color it's shown in!
+              {t('games.colorMatch.instructions')}
             </Text>
 
             <View style={styles.exampleContainer}>
@@ -490,7 +501,7 @@ export default function ColorMatchScreen() {
                 <View style={styles.statIconContainer}>
                   <Ionicons name="trophy" size={20} color={COLORS.warning} />
                 </View>
-                <Text style={styles.statLabel}>High Score</Text>
+                <Text style={styles.statLabel}>{t('games.highScore')}</Text>
                 <Text style={styles.statValue}>{personalBest}</Text>
               </View>
 
@@ -498,7 +509,7 @@ export default function ColorMatchScreen() {
                 <View style={styles.statIconContainer}>
                   <Ionicons name="time" size={20} color={COLORS.cyan} />
                 </View>
-                <Text style={styles.statLabel}>Time Limit</Text>
+                <Text style={styles.statLabel}>{t('games.colorMatch.timeLeft')}</Text>
                 <Text style={styles.statValue}>30 sec</Text>
               </View>
             </View>
@@ -511,7 +522,7 @@ export default function ColorMatchScreen() {
                 end={{ x: 1, y: 0 }}
               >
                 <Ionicons name="play" size={28} color="#fff" />
-                <Text style={styles.startButtonText}>START GAME</Text>
+                <Text style={styles.startButtonText}>{t('game.startGame').toUpperCase()}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -522,7 +533,7 @@ export default function ColorMatchScreen() {
           <View style={styles.countdownContainer}>
             <Animated.View style={[styles.countdownNumber, countdownAnimStyle]}>
               <Text style={styles.countdownText}>
-                {countdownValue === 0 ? 'GO!' : countdownValue}
+                {countdownValue === 0 ? t('game.go') : countdownValue}
               </Text>
             </Animated.View>
           </View>
@@ -556,7 +567,7 @@ export default function ColorMatchScreen() {
             {/* Score and Streak Row */}
             <View style={styles.statsRow}>
               <Animated.View style={[styles.scoreContainer, scoreAnimStyle]}>
-                <Text style={styles.scoreLabel}>SCORE</Text>
+                <Text style={styles.scoreLabel}>{t('games.colorMatch.score').toUpperCase()}</Text>
                 <Text style={styles.scoreValue}>{score}</Text>
               </Animated.View>
 
@@ -667,30 +678,30 @@ export default function ColorMatchScreen() {
                 >
                   <Ionicons name="checkmark-done" size={40} color="#fff" />
                 </LinearGradient>
-                <Text style={styles.resultTitle}>TIME'S UP!</Text>
+                <Text style={styles.resultTitle}>{t('games.colorMatch.gameOver')}</Text>
               </View>
 
               <View style={styles.resultScoreContainer}>
                 <Text style={styles.resultScoreNumber}>{score}</Text>
-                <Text style={styles.resultScoreLabel}>POINTS</Text>
+                <Text style={styles.resultScoreLabel}>{t('game.points').toUpperCase()}</Text>
               </View>
 
               {score > personalBest && (
                 <View style={styles.newHighScoreBadge}>
                   <Ionicons name="trophy" size={20} color={COLORS.warning} />
-                  <Text style={styles.newHighScoreText}>NEW HIGH SCORE!</Text>
+                  <Text style={styles.newHighScoreText}>{t('game.newHighScore')}</Text>
                 </View>
               )}
 
               <View style={styles.resultStatsGrid}>
                 <View style={styles.resultStatItem}>
                   <Text style={styles.resultStatValue}>{correctCount}</Text>
-                  <Text style={styles.resultStatLabel}>Correct</Text>
+                  <Text style={styles.resultStatLabel}>{t('games.colorMatch.correct')}</Text>
                 </View>
                 <View style={styles.resultStatDivider} />
                 <View style={styles.resultStatItem}>
                   <Text style={styles.resultStatValue}>{getAccuracy()}%</Text>
-                  <Text style={styles.resultStatLabel}>Accuracy</Text>
+                  <Text style={styles.resultStatLabel}>{t('profile.statistics')}</Text>
                 </View>
                 <View style={styles.resultStatDivider} />
                 <View style={styles.resultStatItem}>
@@ -698,7 +709,7 @@ export default function ColorMatchScreen() {
                     <Text style={styles.resultStatValue}>{bestStreak}</Text>
                     {bestStreak >= 5 && <Text style={styles.miniStreak}>!</Text>}
                   </View>
-                  <Text style={styles.resultStatLabel}>Best Streak</Text>
+                  <Text style={styles.resultStatLabel}>{t('profile.bestStreak')}</Text>
                 </View>
               </View>
 
@@ -708,7 +719,7 @@ export default function ColorMatchScreen() {
               </View>
 
               <Button
-                title={phase === 'submitting' ? 'Submitting...' : 'SUBMIT SCORE'}
+                title={phase === 'submitting' ? t('common.loading') : t('common.save').toUpperCase()}
                 onPress={handleSubmit}
                 loading={phase === 'submitting'}
                 size="large"
@@ -721,7 +732,7 @@ export default function ColorMatchScreen() {
                 disabled={phase === 'submitting'}
               >
                 <Ionicons name="reload" size={20} color={COLORS.textSecondary} />
-                <Text style={styles.playAgainText}>Play Again</Text>
+                <Text style={styles.playAgainText}>{t('games.colorMatch.playAgain')}</Text>
               </TouchableOpacity>
             </Animated.View>
           </View>

@@ -35,6 +35,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../theme/colors';
 import { useRTL, flipStyle } from '../utils/rtl';
 import { RTLView, RTLIcon } from './RTLView';
+import { useTranslation } from 'react-i18next';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -78,6 +79,7 @@ export function HeadlineBanner({
 }: HeadlineBannerProps) {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const { isRTL } = useRTL();
+  const { t } = useTranslation();
 
   // Animation values
   const shimmerPosition = useSharedValue(-SCREEN_WIDTH);
@@ -136,7 +138,7 @@ export function HeadlineBanner({
 
   // Format time remaining
   const formatTimeLeft = () => {
-    if (timeLeft <= 0) return 'Expired';
+    if (timeLeft <= 0) return t('home.expired');
 
     const totalSeconds = Math.floor(timeLeft / 1000);
     const hours = Math.floor(totalSeconds / 3600);

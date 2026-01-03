@@ -25,6 +25,7 @@ import Animated, {
   FadeInUp,
   FadeInDown,
 } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
 // Game Color Palette
 const COLORS = {
@@ -48,9 +49,9 @@ const CARD_WIDTH = (SCREEN_WIDTH - 48) / 2;
 // Game data
 interface Game {
   id: string;
-  name: string;
+  nameKey: string;
+  descriptionKey: string;
   icon: string;
-  description: string;
   route: string;
   gradientColors: readonly [string, string];
   glowColor: string;
@@ -60,9 +61,9 @@ interface Game {
 const GAMES: Game[] = [
   {
     id: 'memory-match',
-    name: 'Memory Match',
+    nameKey: 'games.memoryMatch.title',
+    descriptionKey: 'games.memoryMatch.description',
     icon: 'brain',
-    description: 'Match the pairs!',
     route: '/games/memory-match',
     gradientColors: [COLORS.PURPLE, '#7C3AED'] as const,
     glowColor: COLORS.PURPLE,
@@ -70,9 +71,9 @@ const GAMES: Game[] = [
   },
   {
     id: 'reaction-time',
-    name: 'Reaction Time',
+    nameKey: 'games.reactionTime.title',
+    descriptionKey: 'games.reactionTime.description',
     icon: 'zap',
-    description: 'How fast are you?',
     route: '/games/reaction-time',
     gradientColors: [COLORS.ELECTRIC_CYAN, '#0891B2'] as const,
     glowColor: COLORS.ELECTRIC_CYAN,
@@ -80,9 +81,9 @@ const GAMES: Game[] = [
   },
   {
     id: 'color-match',
-    name: 'Color Match',
+    nameKey: 'games.colorMatch.title',
+    descriptionKey: 'games.colorMatch.description',
     icon: 'palette',
-    description: "Don't get tricked!",
     route: '/games/color-match',
     gradientColors: [COLORS.GAME_CORAL, '#DC2626'] as const,
     glowColor: COLORS.GAME_CORAL,
@@ -90,9 +91,9 @@ const GAMES: Game[] = [
   },
   {
     id: 'quick-math',
-    name: 'Quick Math',
+    nameKey: 'games.quickMath.title',
+    descriptionKey: 'games.quickMath.description',
     icon: 'calculator',
-    description: 'Beat the clock!',
     route: '/games/quick-math',
     gradientColors: [COLORS.NEON_GREEN, '#10B981'] as const,
     glowColor: COLORS.NEON_GREEN,
@@ -100,9 +101,9 @@ const GAMES: Game[] = [
   },
   {
     id: 'simon-says',
-    name: 'Simon Says',
+    nameKey: 'games.simonSays.title',
+    descriptionKey: 'games.simonSays.description',
     icon: 'musical-notes',
-    description: 'Follow the pattern!',
     route: '/games/simon-says',
     gradientColors: [COLORS.GOLD, '#F59E0B'] as const,
     glowColor: COLORS.GOLD,
@@ -165,6 +166,7 @@ function GameCard({
   index: number;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
   const scale = useSharedValue(1);
   const translateY = useSharedValue(0);
   const glowOpacity = useSharedValue(0.3);
@@ -260,15 +262,15 @@ function GameCard({
           </View>
 
           {/* Game Name */}
-          <Text style={styles.gameName}>{game.name}</Text>
+          <Text style={styles.gameName}>{t(game.nameKey)}</Text>
 
           {/* Description */}
-          <Text style={styles.gameDescription}>{game.description}</Text>
+          <Text style={styles.gameDescription}>{t(game.descriptionKey)}</Text>
 
           {/* High Score */}
           <View style={styles.highScoreContainer}>
             <View style={styles.highScoreBadge}>
-              <Text style={styles.highScoreLabel}>HIGH SCORE</Text>
+              <Text style={styles.highScoreLabel}>{t('games.highScore')}</Text>
               <Text style={styles.highScoreValue}>
                 {game.highScore.toLocaleString()}
               </Text>
@@ -307,6 +309,7 @@ function GameIcon({
 
 // Header Component
 function GamesHeader() {
+  const { t } = useTranslation();
   const titleScale = useSharedValue(0.8);
   const titleOpacity = useSharedValue(0);
 
@@ -333,8 +336,8 @@ function GamesHeader() {
             <GameIcon name="zap" color={COLORS.DARK_NAVY} size={28} />
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>GAMES HUB</Text>
-            <Text style={styles.headerSubtitle}>Challenge your skills</Text>
+            <Text style={styles.headerTitle}>{t('games.hub')}</Text>
+            <Text style={styles.headerSubtitle}>{t('games.challengeYourSkills')}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -436,12 +439,13 @@ function Particle({ index }: { index: number }) {
 
 // Stats Section
 function StatsSection() {
+  const { t } = useTranslation();
   return (
     <Animated.View
       entering={FadeInDown.delay(500).duration(500).springify()}
       style={styles.statsSection}
     >
-      <Text style={styles.statsSectionTitle}>YOUR STATS</Text>
+      <Text style={styles.statsSectionTitle}>{t('games.yourStats')}</Text>
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <LinearGradient
@@ -449,7 +453,7 @@ function StatsSection() {
             style={styles.statCardGradient}
           >
             <Text style={styles.statValue}>5,420</Text>
-            <Text style={styles.statLabel}>Total Score</Text>
+            <Text style={styles.statLabel}>{t('games.totalScore')}</Text>
           </LinearGradient>
         </View>
         <View style={styles.statCard}>
@@ -458,7 +462,7 @@ function StatsSection() {
             style={styles.statCardGradient}
           >
             <Text style={styles.statValue}>23</Text>
-            <Text style={styles.statLabel}>Games Played</Text>
+            <Text style={styles.statLabel}>{t('games.gamesPlayed')}</Text>
           </LinearGradient>
         </View>
         <View style={styles.statCard}>
@@ -467,7 +471,7 @@ function StatsSection() {
             style={styles.statCardGradient}
           >
             <Text style={styles.statValue}>3</Text>
-            <Text style={styles.statLabel}>Win Streak</Text>
+            <Text style={styles.statLabel}>{t('games.winStreak')}</Text>
           </LinearGradient>
         </View>
       </View>
@@ -478,6 +482,7 @@ function StatsSection() {
 // Main Games Screen
 export default function GamesScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleGamePress = (game: Game) => {
     if (Platform.OS !== 'web') {
@@ -508,7 +513,7 @@ export default function GamesScreen() {
 
           {/* Games Grid */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>AVAILABLE GAMES</Text>
+            <Text style={styles.sectionTitle}>{t('games.availableGames')}</Text>
             <View style={styles.gamesGrid}>
               {GAMES.map((game, index) => (
                 <GameCard
@@ -529,7 +534,7 @@ export default function GamesScreen() {
             entering={FadeInDown.delay(600).duration(500).springify()}
             style={styles.section}
           >
-            <Text style={styles.sectionTitle}>COMING SOON</Text>
+            <Text style={styles.sectionTitle}>{t('games.comingSoon')}</Text>
             <View style={styles.comingSoonCard}>
               <LinearGradient
                 colors={[COLORS.DEEP_PURPLE, COLORS.MIDNIGHT_BLUE]}
@@ -540,9 +545,9 @@ export default function GamesScreen() {
                     <GameIcon name="zap" color={COLORS.GAME_ORANGE} size={24} />
                   </View>
                   <View style={styles.comingSoonText}>
-                    <Text style={styles.comingSoonTitle}>More Games Loading...</Text>
+                    <Text style={styles.comingSoonTitle}>{t('games.moreGamesLoading')}</Text>
                     <Text style={styles.comingSoonSubtitle}>
-                      New challenges coming every week!
+                      {t('games.newChallengesComingWeekly')}
                     </Text>
                   </View>
                 </View>

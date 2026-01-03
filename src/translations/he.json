@@ -99,25 +99,111 @@
     "submitAnswer": "שלח תשובה"
   },
   "games": {
+    "hub": "מרכז המשחקים",
+    "challengeYourSkills": "אתגר את היכולות שלך",
+    "availableGames": "משחקים זמינים",
+    "comingSoon": "בקרוב",
+    "moreGamesLoading": "משחקים נוספים בדרך...",
+    "newChallengesComingWeekly": "אתגרים חדשים כל שבוע!",
+    "highScore": "שיא",
+    "yourStats": "הסטטיסטיקות שלך",
+    "totalScore": "ניקוד כולל",
+    "gamesPlayed": "משחקים ששוחקו",
+    "winStreak": "רצף ניצחונות",
     "colorMatch": {
       "title": "התאמת צבעים",
-      "description": "התאם את הצבע, לא את המילה!"
+      "description": "אל תיתפס!"
     },
     "memoryMatch": {
       "title": "משחק זיכרון",
-      "description": "מצא זוגות תואמים"
+      "description": "התאם את הזוגות!"
     },
     "simonSays": {
       "title": "סיימון אומר",
-      "description": "עקוב אחרי הדפוס"
+      "description": "עקוב אחרי הדפוס!"
     },
     "quickMath": {
       "title": "חשבון מהיר",
-      "description": "פתור תרגילים מהר"
+      "description": "נצח את השעון!"
     },
     "reactionTime": {
       "title": "זמן תגובה",
-      "description": "בדוק את הרפלקסים שלך"
+      "description": "כמה מהיר אתה?",
+      "instructions": "הקש כמה שיותר מהר כשהעיגול הופך לירוק!",
+      "start": "התחל",
+      "wait": "המתן...",
+      "tap": "הקש!",
+      "tooEarly": "מוקדם מדי!",
+      "results": "תוצאות",
+      "round": "סיבוב",
+      "averageReactionTime": "זמן תגובה ממוצע",
+      "noValidTimes": "אין זמנים תקינים",
+      "playAgain": "שחק שוב",
+      "exit": "יציאה",
+      "fail": "נכשל",
+      "ratings": {
+        "lightning": "ברק!",
+        "quick": "מהיר!",
+        "good": "טוב!",
+        "keepTrying": "המשך לנסות"
+      }
+    },
+    "memoryMatch": {
+      "title": "משחק זיכרון",
+      "description": "התאם את הזוגות!",
+      "instructions": "מצא את כל הזוגות התואמים!",
+      "moves": "מהלכים",
+      "pairs": "זוגות",
+      "timeElapsed": "זמן",
+      "matched": "התאמה!",
+      "tryAgain": "נסה שוב",
+      "congratulations": "כל הכבוד!",
+      "youWon": "ניצחת!",
+      "playAgain": "שחק שוב",
+      "exit": "יציאה"
+    },
+    "colorMatch": {
+      "title": "התאמת צבעים",
+      "description": "אל תיתפס!",
+      "instructions": "הקש כן אם הצבע תואם למילה, לא אם לא!",
+      "yes": "כן",
+      "no": "לא",
+      "correct": "נכון!",
+      "wrong": "טעות!",
+      "score": "ניקוד",
+      "timeLeft": "זמן נותר",
+      "gameOver": "המשחק נגמר!",
+      "finalScore": "ניקוד סופי",
+      "playAgain": "שחק שוב",
+      "exit": "יציאה"
+    },
+    "quickMath": {
+      "title": "חשבון מהיר",
+      "description": "נצח את השעון!",
+      "instructions": "פתור כמה שיותר תרגילים!",
+      "score": "ניקוד",
+      "timeLeft": "זמן",
+      "correct": "נכון!",
+      "wrong": "טעות!",
+      "gameOver": "נגמר הזמן!",
+      "finalScore": "ניקוד סופי",
+      "problems": "תרגילים שנפתרו",
+      "playAgain": "שחק שוב",
+      "exit": "יציאה"
+    },
+    "simonSays": {
+      "title": "סיימון אומר",
+      "description": "עקוב אחרי הדפוס!",
+      "instructions": "צפה בדפוס וחזור עליו!",
+      "watch": "צפה...",
+      "yourTurn": "התור שלך!",
+      "level": "שלב",
+      "correct": "נכון!",
+      "wrong": "דפוס שגוי!",
+      "gameOver": "המשחק נגמר!",
+      "levelReached": "הגעת לשלב",
+      "playAgain": "שחק שוב",
+      "exit": "יציאה"
     }
   },
   "events": {
@@ -596,5 +682,76 @@
     "selectedItem": "פריט נבחר",
     "expandedSection": "מקטע מורחב",
     "collapsedSection": "מקטע מכווץ"
+  },
+  "home": {
+    "noChallengeToday": "אין אתגר היום",
+    "checkBackLater": "חזור מאוחר יותר לקרב הבא!",
+    "endsIn": "מסתיים בעוד",
+    "startsIn": "מתחיל בעוד",
+    "playNow": "שחק עכשיו",
+    "live": "פעיל",
+    "upcoming": "בקרוב",
+    "completed": "הושלם",
+    "viewResults": "צפה בתוצאות",
+    "dayStreak": "רצף של {{count}} ימים!",
+    "squadMembersPlayed": "{{submitted}}/{{total}} חברי סקווד שיחקו",
+    "hrs": "שעות",
+    "min": "דק'",
+    "sec": "שנ'",
+    "expired": "פג תוקף",
+    "remaining": "נותרו",
+    "predictionTime": "זמן ניחוש",
+    "selfieChallenge": "אתגר סלפי",
+    "pressureTap": "הקשה בלחץ",
+    "xpReward": "+{{amount}} XP",
+    "earnXP": "הרווח XP",
+    "xpToLevel": "XP לרמה {{level}}",
+    "level": "רמה {{level}}",
+    "totalXP": "סה\"כ XP",
+    "rank": "דירוג",
+    "streak": "רצף",
+    "joinSquadToPlay": "הצטרף לסקווד כדי לשחק!",
+    "dailyChallengesRequireSquad": "אתגרים יומיים דורשים סקווד. צור או הצטרף לאחד כדי להתחרות עם חברים!",
+    "findYourSquad": "מצא את הסקווד שלך",
+    "missedChallenge": "פספסת את האתגר הזה",
+    "comebackStartsNow": "הקאמבק מתחיל עכשיו!",
+    "growYourSquad": "גדל את הסקווד שלך!",
+    "judgeToday": "אתה השופט היום!",
+    "defaultPlayerName": "שחקן",
+    "inviteFriends": "הזמן חברים",
+    "levelTitles": {
+      "newbie": "מתחיל",
+      "rookie": "טירון",
+      "risingStar": "כוכב עולה",
+      "competitor": "מתחרה",
+      "challengeSeeker": "מחפש אתגרים",
+      "squadVeteran": "ותיק הסקווד",
+      "elitePlayer": "שחקן עילית",
+      "squadLegend": "אגדת סקווד",
+      "hallOfFamer": "היכל התהילה",
+      "mythicLegend": "אגדה מיתית"
+    }
+  },
+  "crownHolder": {
+    "title": "נושא הכתר",
+    "setHeadline": "קבע כותרת",
+    "declareRivalry": "הכרז על יריבות",
+    "allPowersUsed": "כל הכוחות נוצלו לכתר הזה!",
+    "defaultName": "נושא הכתר"
+  },
+  "underdogPowers": {
+    "active": "אנדרדוג פעיל",
+    "doubleChance": "הזדמנות כפולה",
+    "doubleChanceDesc": "שני ניסיונות באתגר",
+    "targetLock": "נעילת מטרה",
+    "targetLockDesc": "נעל על מוביל",
+    "chaosCard": "קלף כאוס",
+    "chaosCardDesc": "שינוי חוקים אקראי",
+    "streakShield": "מגן רצף",
+    "streakShieldDesc": "הגן על הרצף שלך",
+    "expired": "פג תוקף"
+  },
+  "badges": {
+    "rival": "יריב"
   }
 }

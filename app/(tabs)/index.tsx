@@ -52,6 +52,8 @@ import { useCrownStore } from '../../src/store/crownStore';
 import { useRealtimeEvent } from '../../src/hooks/useRealtimeEvent';
 import { EventType } from '../../src/types';
 import { PowerType } from '../../src/types/powers';
+import { useTranslation } from 'react-i18next';
+import { useRTL } from '../../src/utils/rtl';
 
 // Game Color Palette - Exciting and vibrant
 const COLORS = {
@@ -88,38 +90,38 @@ const COLORS = {
   WARNING_AMBER: '#F59E0B',
 };
 
-// Level titles based on level
-const getLevelTitle = (level: number): string => {
-  if (level >= 50) return 'Mythic Legend';
-  if (level >= 40) return 'Hall of Famer';
-  if (level >= 30) return 'Squad Legend';
-  if (level >= 25) return 'Elite Player';
-  if (level >= 20) return 'Squad Veteran';
-  if (level >= 15) return 'Challenge Seeker';
-  if (level >= 10) return 'Competitor';
-  if (level >= 5) return 'Rising Star';
-  if (level >= 2) return 'Rookie';
-  return 'Newbie';
+// Level titles based on level - returns translation key
+const getLevelTitleKey = (level: number): string => {
+  if (level >= 50) return 'home.levelTitles.mythicLegend';
+  if (level >= 40) return 'home.levelTitles.hallOfFamer';
+  if (level >= 30) return 'home.levelTitles.squadLegend';
+  if (level >= 25) return 'home.levelTitles.elitePlayer';
+  if (level >= 20) return 'home.levelTitles.squadVeteran';
+  if (level >= 15) return 'home.levelTitles.challengeSeeker';
+  if (level >= 10) return 'home.levelTitles.competitor';
+  if (level >= 5) return 'home.levelTitles.risingStar';
+  if (level >= 2) return 'home.levelTitles.rookie';
+  return 'home.levelTitles.newbie';
 };
 
 // Event type configurations
-const EVENT_CONFIG: Record<EventType, { icon: string; colors: string[]; title: string; xpReward: number }> = {
+const EVENT_CONFIG: Record<EventType, { icon: string; colors: string[]; titleKey: string; xpReward: number }> = {
   POLL: {
     icon: 'analytics',
     colors: [COLORS.ELECTRIC_PURPLE, '#A855F7'],
-    title: 'PREDICTION TIME',
+    titleKey: 'home.predictionTime',
     xpReward: 30,
   },
   LIVE_SELFIE: {
     icon: 'camera',
     colors: [COLORS.PINK_GLOW, '#F472B6'],
-    title: 'SELFIE CHALLENGE',
+    titleKey: 'home.selfieChallenge',
     xpReward: 25,
   },
   PRESSURE_TAP: {
     icon: 'flash',
     colors: [COLORS.ELECTRIC_CYAN, '#22D3EE'],
-    title: 'PRESSURE TAP',
+    titleKey: 'home.pressureTap',
     xpReward: 35,
   },
 };
@@ -240,6 +242,7 @@ function PulsingGlowCard({ children, urgencyLevel }: { children: React.ReactNode
 function GameCountdown({ targetTime, isClosing }: { targetTime: Date; isClosing: boolean }) {
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0, total: 0 });
   const pulseScale = useSharedValue(1);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const updateTime = () => {
@@ -298,22 +301,22 @@ function GameCountdown({ targetTime, isClosing }: { targetTime: Date; isClosing:
   return (
     <Animated.View style={[styles.countdownContainer, pulseStyle]}>
       <Text style={[styles.countdownLabel, { color: timerColor }]}>
-        {isClosing ? 'ENDS IN' : 'STARTS IN'}
+        {isClosing ? t('home.endsIn') : t('home.startsIn')}
       </Text>
       <View style={styles.countdownRow}>
         <View style={[styles.countdownBox, { borderColor: timerColor }]}>
           <Text style={[styles.countdownNumber, { color: timerColor }]}>{formatNum(timeLeft.hours)}</Text>
-          <Text style={styles.countdownUnit}>HRS</Text>
+          <Text style={styles.countdownUnit}>{t('home.hrs')}</Text>
         </View>
         <Text style={[styles.countdownSeparator, { color: timerColor }]}>:</Text>
         <View style={[styles.countdownBox, { borderColor: timerColor }]}>
           <Text style={[styles.countdownNumber, { color: timerColor }]}>{formatNum(timeLeft.minutes)}</Text>
-          <Text style={styles.countdownUnit}>MIN</Text>
+          <Text style={styles.countdownUnit}>{t('home.min')}</Text>
         </View>
         <Text style={[styles.countdownSeparator, { color: timerColor }]}>:</Text>
         <View style={[styles.countdownBox, { borderColor: timerColor }]}>
           <Text style={[styles.countdownNumber, { color: timerColor }]}>{formatNum(timeLeft.seconds)}</Text>
-          <Text style={styles.countdownUnit}>SEC</Text>
+          <Text style={styles.countdownUnit}>{t('home.sec')}</Text>
         </View>
       </View>
     </Animated.View>
@@ -325,6 +328,8 @@ function PlayNowButton({ onPress }: { onPress: () => void }) {
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0.4);
   const bounce = useSharedValue(0);
+  const { t } = useTranslation();
+  const { isRTL } = useRTL();
 
   useEffect(() => {
     // Continuous subtle pulse
@@ -387,8 +392,8 @@ function PlayNowButton({ onPress }: { onPress: () => void }) {
             end={{ x: 1, y: 1 }}
             style={styles.playButton}
           >
-            <Text style={styles.playButtonText}>PLAY NOW</Text>
-            <Ionicons name="arrow-forward" size={24} color={COLORS.DARK_NAVY} />
+            <Text style={styles.playButtonText}>{t('home.playNow')}</Text>
+            <Ionicons name="arrow-forward" size={24} color={COLORS.DARK_NAVY} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
           </LinearGradient>
         </View>
       </Animated.View>
@@ -449,6 +454,7 @@ function AnimatedStreakBadge({ days }: { days: number }) {
 
 // XP Progress Bar with milestones
 function XPProgressBar({ current, max, level }: { current: number; max: number; level: number }) {
+  const { t } = useTranslation();
   const progress = Math.min((current / max) * 100, 100);
   const progressWidth = useSharedValue(0);
   const glowIntensity = useSharedValue(0);
@@ -483,7 +489,7 @@ function XPProgressBar({ current, max, level }: { current: number; max: number; 
   return (
     <View style={styles.xpBarContainer}>
       <View style={styles.xpBarHeader}>
-        <Text style={styles.xpBarLabel}>XP TO LEVEL {level + 1}</Text>
+        <Text style={styles.xpBarLabel}>{t('home.xpToLevel', { level: level + 1 })}</Text>
         <Text style={styles.xpBarValue}>{current.toLocaleString()} / {max.toLocaleString()}</Text>
       </View>
       <View style={styles.xpBarTrack}>
@@ -694,6 +700,8 @@ function PlayerStatsHeader({
   onPress: () => void;
   onSquadPress: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <Animated.View entering={FadeInDown.duration(600).springify()}>
       <TouchableOpacity style={styles.playerHeader} onPress={onPress} activeOpacity={0.8}>
@@ -733,7 +741,7 @@ function PlayerStatsHeader({
           </View>
           <View style={styles.playerInfo}>
             <Text style={styles.playerName}>@{profile?.display_name}</Text>
-            <Text style={styles.playerTitle}>{getLevelTitle(level)}</Text>
+            <Text style={styles.playerTitle}>{t(getLevelTitleKey(level))}</Text>
           </View>
         </View>
         <View style={styles.playerRight}>
@@ -757,6 +765,7 @@ function PlayerStatsHeader({
 
 // XP Reward Preview with sparkles
 function XPRewardPreview({ amount }: { amount: number }) {
+  const { t } = useTranslation();
   return (
     <View style={styles.xpRewardContainer}>
       <SparkleEffect style={{ position: 'absolute', top: -5, left: -5 }} />
@@ -769,7 +778,7 @@ function XPRewardPreview({ amount }: { amount: number }) {
         style={styles.xpRewardBadge}
       >
         <Ionicons name="star" size={16} color={COLORS.DARK_NAVY} />
-        <Text style={styles.xpRewardText}>+{amount} XP</Text>
+        <Text style={styles.xpRewardText}>{t('home.xpReward', { amount })}</Text>
       </LinearGradient>
     </View>
   );
@@ -777,6 +786,7 @@ function XPRewardPreview({ amount }: { amount: number }) {
 
 // No Squad Empty State for Daily Challenge
 function NoSquadChallengeCard({ onJoinSquad }: { onJoinSquad: () => void }) {
+  const { t } = useTranslation();
   const glowOpacity = useSharedValue(0.3);
 
   useEffect(() => {
@@ -812,9 +822,9 @@ function NoSquadChallengeCard({ onJoinSquad }: { onJoinSquad: () => void }) {
             </View>
           </View>
 
-          <Text style={styles.noSquadChallengeTitle}>Join a Squad to Play!</Text>
+          <Text style={styles.noSquadChallengeTitle}>{t('home.joinSquadToPlay')}</Text>
           <Text style={styles.noSquadChallengeSubtitle}>
-            Daily challenges require a squad. Create or join one to compete with friends!
+            {t('home.dailyChallengesRequireSquad')}
           </Text>
 
           <TouchableOpacity
@@ -828,7 +838,7 @@ function NoSquadChallengeCard({ onJoinSquad }: { onJoinSquad: () => void }) {
               style={styles.noSquadChallengeButtonGradient}
             >
               <Ionicons name="add-circle" size={20} color="#fff" />
-              <Text style={styles.noSquadChallengeButtonText}>Find Your Squad</Text>
+              <Text style={styles.noSquadChallengeButtonText}>{t('home.findYourSquad')}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -860,6 +870,7 @@ function DailyChallengeCard({
   onJoinSquad: () => void;
 }) {
   const breatheScale = useSharedValue(1);
+  const { t } = useTranslation();
 
   useEffect(() => {
     breatheScale.value = withRepeat(
@@ -893,8 +904,8 @@ function DailyChallengeCard({
         >
           <View style={styles.emptyStateContainer}>
             <Ionicons name="calendar-outline" size={64} color={COLORS.TEXT_MUTED} />
-            <Text style={styles.emptyStateTitle}>No Challenge Today</Text>
-            <Text style={styles.emptyStateSubtitle}>Check back later for the next battle!</Text>
+            <Text style={styles.emptyStateTitle}>{t('home.noChallengeToday')}</Text>
+            <Text style={styles.emptyStateSubtitle}>{t('home.checkBackLater')}</Text>
           </View>
         </LinearGradient>
       </Animated.View>
@@ -932,7 +943,7 @@ function DailyChallengeCard({
               entering={FadeInDown.delay(300).duration(400)}
               style={styles.eventTitle}
             >
-              {config.title}
+              {t(config.titleKey)}
             </Animated.Text>
 
             {/* Status Badge */}
@@ -942,7 +953,7 @@ function DailyChallengeCard({
                 style={styles.liveBadge}
               >
                 <PulsingDot />
-                <Text style={styles.liveBadgeText}>LIVE</Text>
+                <Text style={styles.liveBadgeText}>{t('home.live')}</Text>
               </Animated.View>
             )}
 
@@ -952,7 +963,7 @@ function DailyChallengeCard({
                 style={styles.upcomingBadge}
               >
                 <Ionicons name="time-outline" size={16} color={COLORS.GOLD} />
-                <Text style={styles.upcomingBadgeText}>UPCOMING</Text>
+                <Text style={styles.upcomingBadgeText}>{t('home.upcoming')}</Text>
               </Animated.View>
             )}
 
@@ -962,7 +973,7 @@ function DailyChallengeCard({
                 style={styles.completedBadge}
               >
                 <Ionicons name="checkmark-circle" size={16} color={COLORS.NEON_GREEN} />
-                <Text style={styles.completedBadgeText}>COMPLETED</Text>
+                <Text style={styles.completedBadgeText}>{t('home.completed')}</Text>
               </Animated.View>
             )}
 
@@ -990,7 +1001,7 @@ function DailyChallengeCard({
                 style={styles.streakCounter}
               >
                 <Ionicons name="flame" size={18} color={COLORS.GAME_ORANGE} />
-                <Text style={styles.streakCounterText}>{streak} Day Streak!</Text>
+                <Text style={styles.streakCounterText}>{t('home.dayStreak', { count: streak })}</Text>
               </Animated.View>
             )}
 
@@ -1004,7 +1015,7 @@ function DailyChallengeCard({
                   <View style={[styles.progressFill, { width: `${(submissionCount / membersCount) * 100}%` }]} />
                 </View>
                 <Text style={styles.progressText}>
-                  {submissionCount}/{membersCount} squad members played
+                  {t('home.squadMembersPlayed', { submitted: submissionCount, total: membersCount })}
                 </Text>
               </Animated.View>
             )}
@@ -1022,7 +1033,7 @@ function DailyChallengeCard({
                   style={styles.viewResultsButton}
                   onPress={onViewResults}
                 >
-                  <Text style={styles.viewResultsText}>View Results</Text>
+                  <Text style={styles.viewResultsText}>{t('home.viewResults')}</Text>
                   <Ionicons name="trophy" size={20} color={COLORS.GOLD} />
                 </TouchableOpacity>
               </Animated.View>
@@ -1030,8 +1041,8 @@ function DailyChallengeCard({
 
             {status === 'closed' && (
               <View style={styles.missedContainer}>
-                <Text style={styles.missedText}>You missed this challenge</Text>
-                <Text style={styles.missedSubtext}>The comeback starts now!</Text>
+                <Text style={styles.missedText}>{t('home.missedChallenge')}</Text>
+                <Text style={styles.missedSubtext}>{t('home.comebackStartsNow')}</Text>
               </View>
             )}
           </LinearGradient>
@@ -1184,6 +1195,8 @@ function PlayerCardModal({
   streak: number;
   rank: number;
 }) {
+  const { t } = useTranslation();
+
   if (!profile) return null;
 
   return (
@@ -1211,7 +1224,7 @@ function PlayerCardModal({
                   </LinearGradient>
                 </View>
                 <Text style={styles.playerCardName}>@{profile.display_name}</Text>
-                <Text style={styles.playerCardTitle}>Level {level} - {getLevelTitle(level)}</Text>
+                <Text style={styles.playerCardTitle}>{t('home.level', { level })} - {t(getLevelTitleKey(level))}</Text>
               </View>
 
               <XPProgressBar current={xp} max={xpToNext} level={level} />
@@ -1220,22 +1233,22 @@ function PlayerCardModal({
                 <View style={styles.playerCardStat}>
                   <Ionicons name="trophy" size={24} color={COLORS.GOLD} />
                   <Text style={styles.playerCardStatValue}>#{rank}</Text>
-                  <Text style={styles.playerCardStatLabel}>Rank</Text>
+                  <Text style={styles.playerCardStatLabel}>{t('home.rank')}</Text>
                 </View>
                 <View style={styles.playerCardStat}>
                   <Ionicons name="flame" size={24} color={COLORS.GAME_ORANGE} />
                   <Text style={styles.playerCardStatValue}>{streak}</Text>
-                  <Text style={styles.playerCardStatLabel}>Streak</Text>
+                  <Text style={styles.playerCardStatLabel}>{t('home.streak')}</Text>
                 </View>
                 <View style={styles.playerCardStat}>
                   <Ionicons name="star" size={24} color={COLORS.ELECTRIC_PURPLE} />
                   <Text style={styles.playerCardStatValue}>{xp}</Text>
-                  <Text style={styles.playerCardStatLabel}>Total XP</Text>
+                  <Text style={styles.playerCardStatLabel}>{t('home.totalXP')}</Text>
                 </View>
               </View>
 
               <TouchableOpacity style={styles.playerCardCloseButton} onPress={onClose}>
-                <Text style={styles.playerCardCloseText}>Close</Text>
+                <Text style={styles.playerCardCloseText}>{t('common.close')}</Text>
               </TouchableOpacity>
             </View>
           </LinearGradient>
@@ -1260,6 +1273,7 @@ function CrownHolderCard({
   hasRivalry: boolean;
 }) {
   const glowOpacity = useSharedValue(0.3);
+  const { t } = useTranslation();
 
   useEffect(() => {
     glowOpacity.value = withRepeat(
@@ -1301,9 +1315,9 @@ function CrownHolderCard({
         <View style={styles.crownHolderHeader}>
           <CrownBadge size="medium" animated />
           <View style={styles.crownHolderTitleContainer}>
-            <Text style={styles.crownHolderTitle}>CROWN HOLDER</Text>
+            <Text style={styles.crownHolderTitle}>{t('crownHolder.title')}</Text>
             <Text style={styles.crownHolderSubtitle}>
-              {hours}h {minutes}m remaining
+              {hours}h {minutes}m {t('home.remaining')}
             </Text>
           </View>
         </View>
@@ -1323,7 +1337,7 @@ function CrownHolderCard({
                 style={styles.crownActionGradient}
               >
                 <Ionicons name="megaphone" size={18} color={COLORS.DARK_NAVY} />
-                <Text style={styles.crownActionText}>Set Headline</Text>
+                <Text style={styles.crownActionText}>{t('crownHolder.setHeadline')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           )}
@@ -1341,7 +1355,7 @@ function CrownHolderCard({
                 style={styles.crownActionGradient}
               >
                 <Ionicons name="flash" size={18} color="#FFFFFF" />
-                <Text style={[styles.crownActionText, { color: '#FFFFFF' }]}>Declare Rivalry</Text>
+                <Text style={[styles.crownActionText, { color: '#FFFFFF' }]}>{t('crownHolder.declareRivalry')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           )}
@@ -1349,7 +1363,7 @@ function CrownHolderCard({
           {hasHeadline && hasRivalry && (
             <View style={styles.crownStatusMessage}>
               <Ionicons name="checkmark-circle" size={20} color={COLORS.GOLD} />
-              <Text style={styles.crownStatusText}>All powers used for this crown!</Text>
+              <Text style={styles.crownStatusText}>{t('crownHolder.allPowersUsed')}</Text>
             </View>
           )}
         </View>
@@ -1360,6 +1374,8 @@ function CrownHolderCard({
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { isRTL } = useRTL();
   const { profile } = useAuthStore();
   const { currentSquad, squads, setCurrentSquad, members, fetchMembers } = useSquadStore();
   const { fetchTodayEvent, isLoading } = useEventStore();
@@ -1435,7 +1451,7 @@ export default function HomeScreen() {
   const getHeadlinePlayerName = () => {
     if (!activeHeadline) return '';
     const member = members.find(m => m.user_id === activeHeadline.user_id);
-    return member?.profile?.display_name || 'Crown Holder';
+    return member?.profile?.display_name || t('crownHolder.defaultName');
   };
 
   // Get rivalry player data
@@ -1443,7 +1459,7 @@ export default function HomeScreen() {
     const member = members.find(m => m.user_id === userId);
     return {
       id: userId,
-      name: member?.profile?.display_name || 'Player',
+      name: member?.profile?.display_name || t('home.defaultPlayerName'),
       avatarUrl: member?.profile?.avatar_url || null,
     };
   };
@@ -1552,7 +1568,7 @@ export default function HomeScreen() {
   // Prepare squad members for rivalry modal (format expected by component)
   const squadMembersForRivalry = members.map(m => ({
     id: m.user_id,
-    name: m.profile?.display_name || 'Player',
+    name: m.profile?.display_name || t('home.defaultPlayerName'),
     avatarUrl: m.profile?.avatar_url || null,
   }));
 
@@ -1771,8 +1787,8 @@ export default function HomeScreen() {
                     <View style={styles.inviteLeft}>
                       <Ionicons name="people-circle" size={36} color={COLORS.ELECTRIC_PURPLE} />
                       <View style={styles.inviteTextContainer}>
-                        <Text style={styles.inviteTitle}>Invite Friends</Text>
-                        <Text style={styles.inviteSubtitle}>Grow your squad!</Text>
+                        <Text style={styles.inviteTitle}>{t('home.inviteFriends')}</Text>
+                        <Text style={styles.inviteSubtitle}>{t('home.growYourSquad')}</Text>
                       </View>
                     </View>
                     <View style={styles.inviteCodeContainer}>
@@ -1813,8 +1829,8 @@ export default function HomeScreen() {
                   style={styles.judgeCardGradient}
                 >
                   <Ionicons name="hammer" size={24} color={COLORS.DARK_NAVY} />
-                  <Text style={styles.judgeCardText}>You're the Judge Today!</Text>
-                  <Ionicons name="arrow-forward" size={20} color={COLORS.DARK_NAVY} />
+                  <Text style={styles.judgeCardText}>{t('home.judgeToday')}</Text>
+                  <Ionicons name="arrow-forward" size={20} color={COLORS.DARK_NAVY} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
                 </LinearGradient>
               </TouchableOpacity>
             </Animated.View>

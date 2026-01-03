@@ -62,25 +62,111 @@
     "perfectRound": "Perfect Round!"
   },
   "games": {
+    "hub": "GAMES HUB",
+    "challengeYourSkills": "Challenge your skills",
+    "availableGames": "AVAILABLE GAMES",
+    "comingSoon": "COMING SOON",
+    "moreGamesLoading": "More Games Loading...",
+    "newChallengesComingWeekly": "New challenges coming every week!",
+    "highScore": "HIGH SCORE",
+    "yourStats": "YOUR STATS",
+    "totalScore": "Total Score",
+    "gamesPlayed": "Games Played",
+    "winStreak": "Win Streak",
     "colorMatch": {
       "title": "Color Match",
-      "description": "Match the color, not the word!"
+      "description": "Don't get tricked!"
     },
     "memoryMatch": {
       "title": "Memory Match",
-      "description": "Find matching pairs"
+      "description": "Match the pairs!"
     },
     "simonSays": {
       "title": "Simon Says",
-      "description": "Follow the pattern"
+      "description": "Follow the pattern!"
     },
     "quickMath": {
       "title": "Quick Math",
-      "description": "Solve math problems fast"
+      "description": "Beat the clock!"
     },
     "reactionTime": {
       "title": "Reaction Time",
-      "description": "Test your reflexes"
+      "description": "How fast are you?",
+      "instructions": "Tap as fast as you can when the circle turns green!",
+      "start": "START",
+      "wait": "Wait...",
+      "tap": "TAP!",
+      "tooEarly": "Too Early!",
+      "results": "Results",
+      "round": "Round",
+      "averageReactionTime": "Average Reaction Time",
+      "noValidTimes": "No valid times",
+      "playAgain": "Play Again",
+      "exit": "Exit",
+      "fail": "FAIL",
+      "ratings": {
+        "lightning": "LIGHTNING!",
+        "quick": "QUICK!",
+        "good": "GOOD!",
+        "keepTrying": "KEEP TRYING"
+      }
+    },
+    "memoryMatch": {
+      "title": "Memory Match",
+      "description": "Match the pairs!",
+      "instructions": "Find all matching pairs!",
+      "moves": "Moves",
+      "pairs": "Pairs",
+      "timeElapsed": "Time",
+      "matched": "Matched!",
+      "tryAgain": "Try Again",
+      "congratulations": "Congratulations!",
+      "youWon": "You Won!",
+      "playAgain": "Play Again",
+      "exit": "Exit"
+    },
+    "colorMatch": {
+      "title": "Color Match",
+      "description": "Don't get tricked!",
+      "instructions": "Tap YES if the color matches the word, NO if it doesn't!",
+      "yes": "YES",
+      "no": "NO",
+      "correct": "Correct!",
+      "wrong": "Wrong!",
+      "score": "Score",
+      "timeLeft": "Time Left",
+      "gameOver": "Game Over!",
+      "finalScore": "Final Score",
+      "playAgain": "Play Again",
+      "exit": "Exit"
+    },
+    "quickMath": {
+      "title": "Quick Math",
+      "description": "Beat the clock!",
+      "instructions": "Solve as many math problems as you can!",
+      "score": "Score",
+      "timeLeft": "Time",
+      "correct": "Correct!",
+      "wrong": "Wrong!",
+      "gameOver": "Time's Up!",
+      "finalScore": "Final Score",
+      "problems": "Problems Solved",
+      "playAgain": "Play Again",
+      "exit": "Exit"
+    },
+    "simonSays": {
+      "title": "Simon Says",
+      "description": "Follow the pattern!",
+      "instructions": "Watch the pattern and repeat it!",
+      "watch": "Watch...",
+      "yourTurn": "Your Turn!",
+      "level": "Level",
+      "correct": "Correct!",
+      "wrong": "Wrong Pattern!",
+      "gameOver": "Game Over!",
+      "levelReached": "Level Reached",
+      "playAgain": "Play Again",
+      "exit": "Exit"
     }
   },
   "events": {
@@ -238,5 +324,76 @@
       "leaveSquad": "Are you sure you want to leave",
       "signOut": "Are you sure you want to sign out?"
     }
+  },
+  "home": {
+    "noChallengeToday": "No Challenge Today",
+    "checkBackLater": "Check back later for the next battle!",
+    "endsIn": "ENDS IN",
+    "startsIn": "STARTS IN",
+    "playNow": "PLAY NOW",
+    "live": "LIVE",
+    "upcoming": "UPCOMING",
+    "completed": "COMPLETED",
+    "viewResults": "View Results",
+    "dayStreak": "{{count}} Day Streak!",
+    "squadMembersPlayed": "{{submitted}}/{{total}} squad members played",
+    "hrs": "HRS",
+    "min": "MIN",
+    "sec": "SEC",
+    "expired": "Expired",
+    "remaining": "remaining",
+    "predictionTime": "PREDICTION TIME",
+    "selfieChallenge": "SELFIE CHALLENGE",
+    "pressureTap": "PRESSURE TAP",
+    "xpReward": "+{{amount}} XP",
+    "earnXP": "EARN XP",
+    "xpToLevel": "XP TO LEVEL {{level}}",
+    "level": "Level {{level}}",
+    "totalXP": "Total XP",
+    "rank": "Rank",
+    "streak": "Streak",
+    "joinSquadToPlay": "Join a Squad to Play!",
+    "dailyChallengesRequireSquad": "Daily challenges require a squad. Create or join one to compete with friends!",
+    "findYourSquad": "Find Your Squad",
+    "missedChallenge": "You missed this challenge",
+    "comebackStartsNow": "The comeback starts now!",
+    "growYourSquad": "Grow your squad!",
+    "judgeToday": "You're the Judge Today!",
+    "defaultPlayerName": "Player",
+    "inviteFriends": "Invite Friends",
+    "levelTitles": {
+      "newbie": "Newbie",
+      "rookie": "Rookie",
+      "risingStar": "Rising Star",
+      "competitor": "Competitor",
+      "challengeSeeker": "Challenge Seeker",
+      "squadVeteran": "Squad Veteran",
+      "elitePlayer": "Elite Player",
+      "squadLegend": "Squad Legend",
+      "hallOfFamer": "Hall of Famer",
+      "mythicLegend": "Mythic Legend"
+    }
+  },
+  "crownHolder": {
+    "title": "CROWN HOLDER",
+    "setHeadline": "Set Headline",
+    "declareRivalry": "Declare Rivalry",
+    "allPowersUsed": "All powers used for this crown!",
+    "defaultName": "Crown Holder"
+  },
+  "underdogPowers": {
+    "active": "UNDERDOG ACTIVE",
+    "doubleChance": "Double Chance",
+    "doubleChanceDesc": "Two attempts at the challenge",
+    "targetLock": "Target Lock",
+    "targetLockDesc": "Lock onto a leader",
+    "chaosCard": "Chaos Card",
+    "chaosCardDesc": "Random rule modification",
+    "streakShield": "Streak Shield",
+    "streakShieldDesc": "Protect your streak",
+    "expired": "EXPIRED"
+  },
+  "badges": {
+    "rival": "RIVAL"
   }
 }

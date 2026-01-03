@@ -23,6 +23,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
+import { useGameSounds } from '../../src/hooks/useGameSounds';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -85,6 +87,8 @@ const LIGHT_DURATION = 300; // How long button stays lit
 
 export default function SimonSaysScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { playSound, playSimonNote, initAudio } = useGameSounds();
   const [phase, setPhase] = useState<GamePhase>('ready');
   const [sequence, setSequence] = useState<SimonButton[]>([]);
   const [playerIndex, setPlayerIndex] = useState(0);
@@ -190,6 +194,9 @@ export default function SimonSaysScreen() {
     return new Promise<void>((resolve) => {
       setActiveButton(button);
 
+      // Play unique note for each color
+      playSimonNote(button);
+
       // Animate button glow
       buttonGlows[button].value = withTiming(1, { duration: 50 });
       buttonScales[button].value = withSpring(1.1, { damping: 8, stiffness: 100 });
@@ -228,6 +235,7 @@ export default function SimonSaysScreen() {
   }, [lightUpButton]);
 
   const startGame = useCallback(() => {
+    initAudio(); // Initialize audio on first interaction
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }
@@ -277,7 +285,8 @@ export default function SimonSaysScreen() {
           withSpring(1, { damping: 8, stiffness: 100 })
         );
 
-        // Success haptic and glow
+        // Success sound and haptic
+        playSound('success'); // Level complete sound
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
@@ -303,7 +312,8 @@ export default function SimonSaysScreen() {
       // Wrong button - Game Over!
       setPhase('gameover');
 
-      // Error haptic
+      // Error sound and haptic
+      playSound('gameOver'); // Game over sound
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
@@ -352,15 +362,15 @@ export default function SimonSaysScreen() {
   const getPhaseText = () => {
     switch (phase) {
       case 'ready':
-        return 'TAP TO START';
+        return t('game.tapToStart').toUpperCase();
       case 'watching':
-        return 'WATCH!';
+        return t('games.simonSays.watch').toUpperCase();
       case 'playing':
-        return 'YOUR TURN!';
+        return t('games.simonSays.yourTurn').toUpperCase();
       case 'success':
-        return 'NICE!';
+        return t('games.simonSays.correct').toUpperCase();
       case 'gameover':
-        return 'GAME OVER';
+        return t('games.simonSays.gameOver').toUpperCase();
     }
   };
 
@@ -487,7 +497,7 @@ export default function SimonSaysScreen() {
           </TouchableOpacity>
 
           <View style={styles.headerCenter}>
-            <Text style={styles.title}>SIMON SAYS</Text>
+            <Text style={styles.title}>{t('games.simonSays.title').toUpperCase()}</Text>
           </View>
 
           <View style={styles.highScoreContainer}>
@@ -522,7 +532,7 @@ export default function SimonSaysScreen() {
                   {phase === 'ready' && (
                     <>
                       <Ionicons name="play" size={32} color={COLORS.textSecondary} />
-                      <Text style={styles.centerText}>START</Text>
+                      <Text style={styles.centerText}>{t('game.startGame').toUpperCase()}</Text>
                     </>
                   )}
 
@@ -540,8 +550,8 @@ export default function SimonSaysScreen() {
                   {phase === 'gameover' && (
                     <>
                       <Ionicons name="refresh" size={32} color={COLORS.danger} />
-                      <Text style={styles.gameOverText}>LEVEL {level}</Text>
-                      <Text style={styles.tryAgainText}>TAP TO RETRY</Text>
+                      <Text style={styles.gameOverText}>{t('games.simonSays.level').toUpperCase()} {level}</Text>
+                      <Text style={styles.tryAgainText}>{t('game.playAgain').toUpperCase()}</Text>
                     </>
                   )}
                 </LinearGradient>
@@ -553,19 +563,19 @@ export default function SimonSaysScreen() {
         {/* Bottom Stats */}
         <View style={styles.statsBar}>
           <View style={styles.statItem}>
-            <Text style={styles.statLabel}>LEVEL</Text>
+            <Text style={styles.statLabel}>{t('games.simonSays.level').toUpperCase()}</Text>
             <Text style={styles.statValue}>{level}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statLabel}>SEQUENCE</Text>
+            <Text style={styles.statLabel}>{t('game.round').toUpperCase()}</Text>
             <Text style={styles.statValue}>
               {phase === 'playing' ? `${playerIndex + 1}/${sequence.length}` : sequence.length}
             </Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statLabel}>HIGH SCORE</Text>
+            <Text style={styles.statLabel}>{t('games.highScore').toUpperCase()}</Text>
             <View style={styles.statValueRow}>
               <Ionicons name="trophy" size={16} color={COLORS.energy} />
               <Text style={[styles.statValue, { color: COLORS.energy }]}>{highScore}</Text>
@@ -577,10 +587,7 @@ export default function SimonSaysScreen() {
         {phase === 'ready' && (
           <View style={styles.instructions}>
             <Text style={styles.instructionsText}>
-              Watch the pattern, then repeat it!
-            </Text>
-            <Text style={styles.instructionsSubtext}>
-              Each level adds one more to remember
+              {t('games.simonSays.instructions')}
             </Text>
           </View>
         )}
