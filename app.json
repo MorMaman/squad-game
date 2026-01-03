@@ -4,9 +4,12 @@
     "slug": "squad-game",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
     "splash": {
-      "backgroundColor": "#1a1a2e"
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0E27"
     },
     "assetBundlePatterns": [
       "**/*"
