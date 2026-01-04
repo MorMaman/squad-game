@@ -10,8 +10,20 @@
 
 import { useCallback, useRef, useEffect } from 'react';
 import { Platform } from 'react-native';
-import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 import * as Haptics from 'expo-haptics';
+
+// Only import expo-av on native platforms (it crashes on web)
+let Audio: any = null;
+let InterruptionModeIOS: any = {};
+let InterruptionModeAndroid: any = {};
+
+if (Platform.OS !== 'web') {
+  // Dynamic import for native only
+  const expoAv = require('expo-av');
+  Audio = expoAv.Audio;
+  InterruptionModeIOS = expoAv.InterruptionModeIOS;
+  InterruptionModeAndroid = expoAv.InterruptionModeAndroid;
+}
 
 type SoundType =
   | 'tap'

@@ -35,8 +35,14 @@ test.describe('Squad Game App', () => {
     // Should see the Squad Game title
     await expect(page.locator('text=Squad Game').first()).toBeVisible({ timeout: 10000 });
 
-    // Should see email input - use specific locator for the input field
-    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 10000 });
+    // Should see email input - React Native Web renders TextInput as regular input (type="text")
+    // Find the input associated with the "Email" label by getting the input that follows it
+    const emailLabel = page.locator('text=Email').first();
+    await expect(emailLabel).toBeVisible({ timeout: 10000 });
+
+    // Find the first input on the page (email input comes before password)
+    const emailInput = page.locator('input').first();
+    await expect(emailInput).toBeVisible({ timeout: 10000 });
   });
 
   test('should have proper page title', async ({ page }) => {
@@ -52,8 +58,9 @@ test.describe('Squad Game App', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(6000);
 
-    // Find and click the email input
-    const emailInput = page.locator('input[type="email"]');
+    // Find email input - React Native Web renders TextInput as regular input (type="text")
+    // The email input is the first input on the page
+    const emailInput = page.locator('input').first();
     await expect(emailInput).toBeVisible({ timeout: 10000 });
 
     // Click to focus
