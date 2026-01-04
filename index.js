@@ -3,6 +3,9 @@
  * Initializes RTL settings before the app renders
  */
 
+// Polyfill Reanimated globals for web FIRST (before any other imports)
+import './src/polyfills/reanimated-web';
+
 import { I18nManager, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
