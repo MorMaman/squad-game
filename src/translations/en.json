@@ -400,5 +400,324 @@
   },
   "badges": {
     "rival": "RIVAL"
+  },
+  "currency": {
+    "stars": "Stars",
+    "addStars": "Get Stars",
+    "earn": "Earned",
+    "spend": "Spent",
+    "balance": "Balance",
+    "notEnough": "Not enough stars!",
+    "earned": "+{{amount}} Stars",
+    "spent": "-{{amount}} Stars"
+  },
+  "shop": {
+    "title": "SHOP",
+    "featured": "FEATURED",
+    "categories": {
+      "all": "All",
+      "avatarFrames": "Frames",
+      "themes": "Themes",
+      "wildCards": "Wild Cards",
+      "powerBoosts": "Boosts",
+      "headlines": "Headlines"
+    },
+    "purchase": "Purchase",
+    "purchased": "Owned",
+    "equipped": "Equipped",
+    "equip": "Equip",
+    "unequip": "Unequip",
+    "confirmPurchase": "Confirm Purchase",
+    "purchaseSuccess": "Purchase Successful!",
+    "purchaseFailed": "Purchase Failed",
+    "soldOut": "Sold Out",
+    "limitedTime": "Limited Time",
+    "endsIn": "Ends in {{time}}",
+    "items": {
+      "goldenFrame": "Golden Frame",
+      "goldenFrameDesc": "A prestigious golden border for your avatar",
+      "diamondFrame": "Diamond Frame",
+      "diamondFrameDesc": "A dazzling diamond-studded frame",
+      "legendaryFrame": "Legendary Frame",
+      "legendaryFrameDesc": "The most exclusive frame for true champions",
+      "fireFrame": "Fire Frame",
+      "fireFrameDesc": "A fiery animated border",
+      "neonTheme": "Neon Theme",
+      "neonThemeDesc": "Vibrant neon colors for your interface",
+      "royalTheme": "Royal Theme",
+      "royalThemeDesc": "Purple and gold royal aesthetics",
+      "darkModePro": "Dark Mode Pro",
+      "darkModeProDesc": "Enhanced dark theme with OLED blacks",
+      "extraDoubleChance": "Extra Double Chance",
+      "extraDoubleChanceDesc": "Get an additional Double Chance power",
+      "extraStreakShield": "Extra Streak Shield",
+      "extraStreakShieldDesc": "Protect your streak one more time",
+      "extraChaosCard": "Extra Chaos Card",
+      "extraChaosCardDesc": "Add more chaos to your games"
+    },
+    "wildCards": {
+      "skipCard": "Skip Card",
+      "skipCardDesc": "Skip one event without losing your streak",
+      "doubleXP": "Double XP",
+      "doubleXPDesc": "2x XP for your next 3 events",
+      "stealCrown": "Steal Crown",
+      "stealCrownDesc": "Challenge the crown holder to a head-to-head duel",
+      "revengeCard": "Revenge Card",
+      "revengeCardDesc": "Double points when competing against a specific player",
+      "timeExtend": "Time Extend",
+      "timeExtendDesc": "+30 seconds in timed events",
+      "peekAnswers": "Peek Answers",
+      "peekAnswersDesc": "See poll majority before making your vote"
+    }
+  },
+  "rewards": {
+    "title": "REWARDS",
+    "slots": "Reward Slots",
+    "claimReward": "Claim",
+    "unlocking": "Unlocking...",
+    "ready": "Ready!",
+    "empty": "Empty",
+    "filling": "Filling...",
+    "speedUp": "Speed Up",
+    "claimed": "Claimed!",
+    "rarity": {
+      "common": "Common",
+      "rare": "Rare",
+      "epic": "Epic",
+      "legendary": "Legendary"
+    },
+    "types": {
+      "stars": "Stars",
+      "xp": "XP",
+      "wildCard": "Wild Card",
+      "item": "Item"
+    },
+    "claimModal": {
+      "title": "Reward Unlocked!",
+      "youGot": "You got:",
+      "claim": "Claim Reward",
+      "awesome": "Awesome!"
+    }
+  },
+  "home": {
+    "playEvent": "PLAY",
+    "playGames": "GAMES",
+    "eventOpens": "Opens in {{time}}",
+    "eventOpen": "Event Open!",
+    "eventClosed": "Event Closed",
+    "noEvent": "No Event Today",
+    "menu": "Menu",
+    "dailyLogin": "Daily Login Bonus",
+    "dailyLoginReward": "+{{amount}} Stars",
+    "welcomeBack": "Welcome Back!"
+  },
+  "navigation": {
+    "shop": "Shop"
+  },
+  "gameInfo": {
+    "title": "Game Info",
+    "rulebook": "Game Rulebook",
+    "rulebookDesc": "Powers, roles & how to play",
+    "judgeRole": "Judge Role",
+    "judgeRoleDesc": "Daily judge powers"
+  },
+  "rulebook": {
+    "title": "Rulebook",
+    "header": "Squad Rulebook",
+    "disclaimer": "This is a game between friends. Play fair, have fun!",
+    "searchPowers": "Search powers...",
+    "tabs": {
+      "powers": "Powers",
+      "rules": "Rules",
+      "history": "History"
+    },
+    "coreRules": "Core Rules",
+    "powers": "Powers",
+    "powersDescription": "Special abilities you can earn and use",
+    "howToEarn": "How to Earn",
+    "duration": "Duration",
+    "limits": "Limits",
+    "cancel": "How to Cancel",
+    "expiration": "Expiration",
+    "whoCanActivate": "Who Can Activate",
+    "powerHistory": "Power History",
+    "noPowerHistory": "No powers have been used yet",
+    "activePowers": "Active Powers",
+    "availablePowers": "Available Powers",
+    "usedPowers": "Used Powers",
+    "activationConditions": "Activation Conditions",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "howToUnlock": "How to Unlock",
+    "noPowersFound": "No powers found",
+    "tryAdjusting": "Try adjusting your search or filter",
+    "gamePhilosophy": "Game Philosophy",
+    "philosophySubtitle": "These are the core principles that make Squad Game fair, fun, and meaningful.",
+    "fairPlayGuarantee": "Fair Play Guarantee",
+    "fairPlayDesc": "All powers are designed to be balanced. No single power can dominate the game. Strategy and participation always win over luck.",
+    "livingRules": "Living Rules",
+    "livingRulesDesc": "This rulebook evolves with your squad. New powers may be added and balance adjustments made based on how squads play.",
+    "squadDemocracy": "Squad Democracy",
+    "squadDemocracyDesc": "Major game-changing powers require squad approval. No one player can unilaterally alter the experience for everyone.",
+    "quote": "The best games are the ones where everyone wants to come back tomorrow.",
+    "quoteAuthor": "- Squad Game Philosophy",
+    "categories": {
+      "all": "All",
+      "attack": "Attack",
+      "attackDesc": "Powers that target other players",
+      "defense": "Defense",
+      "defenseDesc": "Powers that protect you",
+      "social": "Social",
+      "socialDesc": "Powers affecting group dynamics",
+      "special": "Special",
+      "specialDesc": "Unique squad-wide effects"
+    },
+    "coreRulesList": {
+      "temporary": "Powers are Temporary",
+      "temporaryDesc": "No power lasts forever. Every power has a clear duration and expiration.",
+      "visible": "Powers are Visible",
+      "visibleDesc": "There are no secret powers. When you activate a power, your squad sees it.",
+      "earned": "Powers are Earned",
+      "earnedDesc": "Show up consistently and you unlock powers. The game rewards engagement.",
+      "absence": "Absence Gives Nothing",
+      "absenceDesc": "You cannot earn powers by sitting out. Inactivity erases your standing.",
+      "influence": "Influence Over Punishment",
+      "influenceDesc": "Powers that help you succeed outweigh powers that hurt others."
+    }
+  },
+  "powers": {
+    "doubleChance": {
+      "name": "Double Chance",
+      "short": "Get two attempts in the next event.",
+      "full": "When activated, you receive two attempts at the next event instead of one. Only your best result is counted toward the final score. This power is perfect for high-stakes moments when you need insurance against a bad attempt.",
+      "duration": "Single use - expires after one event",
+      "limits": "One Double Chance per event per player",
+      "howToCancel": "Cannot be cancelled once an event begins. Before event starts, tap the power badge to deactivate.",
+      "expirationRules": "Expires 24 hours after being granted if not used. Also expires if no events occur within that window.",
+      "unlockCondition": "Finish in bottom 3 of weekly leaderboard",
+      "activationConditions": ["Must be activated before an event starts", "Cannot be used on already-completed events", "Must have earned the power through participation"]
+    },
+    "targetLock": {
+      "name": "Target Lock",
+      "short": "Mark one player as your target.",
+      "full": "Choose one player to lock on to. That player will see a visible indicator that they are being targeted. If you beat their score in the next event, you steal bonus XP from them. Creates psychological pressure and rivalry dynamics.",
+      "duration": "Lasts for one event cycle",
+      "limits": "Can only target one player at a time. Once locked, cannot change target until event ends.",
+      "howToCancel": "Target can be changed before event starts. Once event begins, target is locked.",
+      "expirationRules": "Expires when the event ends. If you beat your target, you gain +50 bonus XP. If they beat you, they gain +25 XP.",
+      "unlockCondition": "Participate in 3 consecutive days",
+      "activationConditions": ["Must select a target before the event starts", "Target must be in the same squad", "Cannot target yourself or the same person twice in a row"]
+    },
+    "chaosCard": {
+      "name": "Chaos Card",
+      "short": "Activate a surprise rule modifier.",
+      "full": "Draw a random rule modifier that affects the next event for ALL players in your squad. Chaos cards can flip the game on its head - reversing scores, adding time pressure, or changing win conditions. High risk, high reward.",
+      "duration": "Affects entire event duration",
+      "limits": "Only one Chaos Card can be active per event. Squad vote required.",
+      "howToCancel": "Can be challenged by 3+ squad members within 2 minutes of activation. If challenged, a vote occurs.",
+      "expirationRules": "Effect ends when event concludes. Some chaos effects may persist into results phase.",
+      "unlockCondition": "Hold the crown OR maintain 7+ day streak",
+      "activationConditions": ["Must be activated during event countdown (10 minutes before)", "Requires confirmation from at least 2 squad members", "Cannot be stacked with other Chaos Cards"]
+    },
+    "streakShield": {
+      "name": "Streak Shield",
+      "short": "Protect your streak if you miss an event.",
+      "full": "Life happens. The Streak Shield automatically activates to save your participation streak if you miss an event. Your streak counter stays intact, but you receive no points for that event. Use wisely - shields are earned, not given.",
+      "duration": "Instant - protects one missed event",
+      "limits": "Maximum one shield per week. Cannot stack multiple shields.",
+      "howToCancel": "Cannot be cancelled. Once triggered, it is consumed.",
+      "expirationRules": "Shield expires unused after 7 days. If not needed within that window, you lose it.",
+      "unlockCondition": "Reach a 5-day participation streak",
+      "activationConditions": ["Automatically activates when you miss an event", "Must have an active streak of 5+ days", "Cannot be manually activated"]
+    },
+    "active": "Active",
+    "expired": "Expired",
+    "used": "Used",
+    "available": "Available",
+    "activateNow": "Activate Now",
+    "expiresIn": "Expires in {{time}}",
+    "powersActive": "{{count}} Powers Active"
+  },
+  "judge": {
+    "title": "Judge",
+    "youAreJudge": "You're the Judge Today!",
+    "todaysJudge": "Today's Judge",
+    "judgeRole": "Judge Role",
+    "judgePowers": "Judge Powers",
+    "judgeBonus": "Judge Bonus",
+    "judgePenalty": "Judge Penalty",
+    "bonusEarned": "+{{amount}} bonus points",
+    "penaltyApplied": "-{{amount}} penalty",
+    "overturned": "Overturned",
+    "challengeDecision": "Challenge Decision",
+    "challengeActive": "Challenge Active",
+    "voteFor": "Vote For",
+    "voteAgainst": "Vote Against",
+    "votesNeeded": "{{current}}/{{needed}} votes needed",
+    "challengeExpires": "Expires in {{time}}",
+    "challengePassed": "Challenge Passed",
+    "challengeFailed": "Challenge Failed",
+    "noChallenges": "No active challenges",
+    "description": "The Judge has special powers during today's event. Their decisions can be challenged by the squad."
+  },
+  "playerStatus": {
+    "insurance": {
+      "title": "Participation Insurance",
+      "active": "Insurance Active",
+      "description": "Your consistent participation qualifies you for minimum rewards even if you don't win.",
+      "minReward": "Minimum {{amount}} points guaranteed"
+    },
+    "comeback": {
+      "title": "Comeback Boost",
+      "active": "Comeback Active",
+      "description": "You've been struggling lately. Earn {{multiplier}}x points for the next {{hours}} hours!",
+      "expiresIn": "Expires in {{time}}"
+    },
+    "pressure": {
+      "title": "Leader Pressure",
+      "active": "Under Pressure",
+      "description": "You're in the lead! Everyone's watching. Don't slip up!",
+      "levels": {
+        "low": "Light pressure",
+        "medium": "Moderate pressure",
+        "high": "Intense pressure"
+      }
+    }
+  },
+  "eventPowers": {
+    "activePowersTitle": "Your Active Powers",
+    "noPowersActive": "No powers active",
+    "powerWillApply": "This power will apply to this event",
+    "tapToActivate": "Tap to activate before event starts",
+    "activeForEvent": "Active for this event"
+  },
+  "events": {
+    "pressureTap": {
+      "title": "PRESSURE TAP",
+      "subtitle": "Tap as fast as you can for 10 seconds!",
+      "tapHere": "TAP HERE!"
+    },
+    "stats": {
+      "yourBest": "Your Best",
+      "squadBest": "Squad Best",
+      "taps": "taps",
+      "tapsLabel": "TAPS"
+    },
+    "countdown": {
+      "go": "GO!"
+    },
+    "result": {
+      "timesUp": "TIME'S UP!",
+      "newPersonalBest": "NEW PERSONAL BEST!",
+      "xpEarned": "XP Earned",
+      "squadRank": "Squad Rank",
+      "moreToBeat": "{{count}} more to beat your best!"
+    },
+    "actions": {
+      "startGame": "START GAME",
+      "submitScore": "SUBMIT SCORE",
+      "submitting": "Submitting...",
+      "tryAgain": "Try Again"
+    }
   }
 }

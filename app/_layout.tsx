@@ -28,6 +28,7 @@ import {
 import { useRouter, Href } from 'expo-router';
 import { RTLProvider } from '../src/providers/RTLProvider';
 import { useRTL } from '../src/utils/rtl';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 /**
  * RTL Restart Banner Component
@@ -169,83 +170,28 @@ function RootLayoutInner() {
       <RTLRestartBanner />
       <Stack
         screenOptions={{
-          headerStyle: {
-            backgroundColor: '#111827',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
+          headerShown: false,
           contentStyle: {
             backgroundColor: '#111827',
           },
           animation: slideAnimation,
-          // Ensure proper RTL layout for headers
-          headerTitleAlign: 'center',
         }}
       >
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="events/live-selfie"
-          options={{ title: 'Live Selfie', presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="events/pressure-tap"
-          options={{ title: 'Pressure Tap', presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="events/poll"
-          options={{ title: 'Daily Poll', presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="games/color-match"
-          options={{
-            title: 'Color Match',
-            presentation: 'fullScreenModal',
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="games/memory-match"
-          options={{
-            title: 'Memory Match',
-            presentation: 'fullScreenModal',
-            headerShown: false,
-            contentStyle: { backgroundColor: '#0A0E27' },
-          }}
-        />
-        <Stack.Screen
-          name="games/simon-says"
-          options={{
-            title: 'Simon Says',
-            presentation: 'fullScreenModal',
-            headerShown: false,
-            contentStyle: { backgroundColor: '#0A0E27' },
-          }}
-        />
-        <Stack.Screen
-          name="games/quick-math"
-          options={{
-            title: 'Quick Math',
-            presentation: 'fullScreenModal',
-            headerShown: false,
-            contentStyle: { backgroundColor: '#0A0E27' },
-          }}
-        />
-        <Stack.Screen
-          name="games/reaction-time"
-          options={{
-            title: 'Reaction Time',
-            presentation: 'fullScreenModal',
-            headerShown: false,
-            contentStyle: { backgroundColor: '#0A0E27' },
-          }}
-        />
-        <Stack.Screen name="results/[eventId]" options={{ title: 'Results' }} />
-        <Stack.Screen name="judge" options={{ title: 'Judge Panel' }} />
-        <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="squad" />
+        <Stack.Screen name="events/live-selfie" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="events/pressure-tap" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="events/poll" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="games/color-match" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="games/memory-match" options={{ presentation: 'fullScreenModal', contentStyle: { backgroundColor: '#0A0E27' } }} />
+        <Stack.Screen name="games/simon-says" options={{ presentation: 'fullScreenModal', contentStyle: { backgroundColor: '#0A0E27' } }} />
+        <Stack.Screen name="games/quick-math" options={{ presentation: 'fullScreenModal', contentStyle: { backgroundColor: '#0A0E27' } }} />
+        <Stack.Screen name="games/reaction-time" options={{ presentation: 'fullScreenModal', contentStyle: { backgroundColor: '#0A0E27' } }} />
+        <Stack.Screen name="results/[eventId]" />
+        <Stack.Screen name="judge" />
+        <Stack.Screen name="auth/callback" />
       </Stack>
     </>
   );
@@ -253,15 +199,17 @@ function RootLayoutInner() {
 
 export default function RootLayout() {
   return (
-    <RTLProvider>
-      <I18nextProvider i18n={i18n}>
-        <SafeAreaProvider>
-          <QueryClientProvider client={queryClient}>
-            <RootLayoutInner />
-          </QueryClientProvider>
-        </SafeAreaProvider>
-      </I18nextProvider>
-    </RTLProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <RTLProvider>
+        <I18nextProvider i18n={i18n}>
+          <SafeAreaProvider>
+            <QueryClientProvider client={queryClient}>
+              <RootLayoutInner />
+            </QueryClientProvider>
+          </SafeAreaProvider>
+        </I18nextProvider>
+      </RTLProvider>
+    </GestureHandlerRootView>
   );
 }
 

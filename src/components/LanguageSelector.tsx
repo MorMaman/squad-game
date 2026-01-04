@@ -16,7 +16,9 @@ import {
   Alert,
   Platform,
   I18nManager,
+  BackHandler,
 } from 'react-native';
+import * as Updates from 'expo-updates';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -85,6 +87,19 @@ export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
     scale.value = withSpring(1, { damping: 15, stiffness: 300 });
   };
 
+  const exitApp = async () => {
+    if (Platform.OS === 'android') {
+      BackHandler.exitApp();
+    } else if (Platform.OS === 'ios') {
+      // iOS doesn't allow programmatic exit, but we can try to reload
+      try {
+        await Updates.reloadAsync();
+      } catch {
+        // In dev mode, this won't work - app will just show the alert
+      }
+    }
+  };
+
   const handleLanguageSelect = async (selectedLanguage: SupportedLanguage) => {
     if (selectedLanguage === language || isChanging) {
       setShowModal(false);
@@ -94,109 +109,56 @@ export function LanguageSelector({ variant = 'full' }: LanguageSelectorProps) {
     setIsChanging(true);
     setPendingLanguage(selectedLanguage);
 
-    // Check if RTL change is needed
-    const newIsRTL = selectedLanguage === 'he';
-    const currentLayoutRTL = Platform.OS === 'web' ? isRTL : I18nManager.isRTL;
-    const needsRTLChange = newIsRTL !== currentLayoutRTL && Platform.OS !== 'web';
+    // Show confirmation alert
+    const alertTitle = selectedLanguage === 'he'
+      ? 'שינוי שפה'
+      : 'Change Language';
 
-    if (needsRTLChange) {
-      // Show restart prompt for RTL change
-      // In dev mode, let users know they'll need to reload manually
-      const devModeNote = __DEV__
-        ? (selectedLanguage === 'he'
-          ? '\n\n(Expo Go: \u05D9\u05D3\u05E8\u05E9 \u05D8\u05E2\u05D9\u05E0\u05D4 \u05D9\u05D3\u05E0\u05D9\u05EA)'
-          : '\n\n(Expo Go: Manual reload required)')
-        : '';
+    const alertMessage = selectedLanguage === 'he'
+      ? 'האפליקציה תיסגר כדי להחיל את השינויים.\nאנא פתח מחדש.'
+      : 'The app will close to apply changes.\nPlease reopen.';
 
-      Alert.alert(
-        t('settings.language'),
-        (selectedLanguage === 'he'
-          ? 'Changing to Hebrew requires app restart for RTL layout.\n\n\u05E9\u05D9\u05E0\u05D5\u05D9 \u05DC\u05E2\u05D1\u05E8\u05D9\u05EA \u05D3\u05D5\u05E8\u05E9 \u05D4\u05E4\u05E2\u05DC\u05D4 \u05DE\u05D7\u05D3\u05E9 \u05DC\u05EA\u05E6\u05D5\u05D2\u05EA RTL.'
-          : 'Changing to English requires app restart for LTR layout.') + devModeNote,
-        [
-          {
-            text: t('common.cancel'),
-            style: 'cancel',
-            onPress: () => {
+    Alert.alert(
+      alertTitle,
+      alertMessage,
+      [
+        {
+          text: t('common.cancel'),
+          style: 'cancel',
+          onPress: () => {
+            setPendingLanguage(null);
+            setIsChanging(false);
+            setShowModal(false);
+          },
+        },
+        {
+          text: 'OK',
+          style: 'default',
+          onPress: async () => {
+            try {
+              // Set the language (this will trigger forceRTL)
+              await setLanguage(selectedLanguage);
+
+              if (Platform.OS !== 'web') {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              }
+
+              setShowModal(false);
+
+              // Small delay to ensure state is saved, then exit
+              setTimeout(() => {
+                exitApp();
+              }, 300);
+            } catch (error) {
+              console.error('Failed to change language:', error);
+              Alert.alert('Error', 'Failed to change language. Please try again.');
               setPendingLanguage(null);
               setIsChanging(false);
-              setShowModal(false);
-            },
+            }
           },
-          {
-            text: __DEV__
-              ? (selectedLanguage === 'he' ? '\u05E9\u05DE\u05D5\u05E8 \u05D5\u05D4\u05E4\u05E2\u05DC \u05D9\u05D3\u05E0\u05D9\u05EA' : 'Save & Reload Manually')
-              : (selectedLanguage === 'he' ? '\u05D4\u05E4\u05E2\u05DC \u05DE\u05D7\u05D3\u05E9' : 'Restart Now'),
-            style: 'default',
-            onPress: async () => {
-              try {
-                // Set the language (this will trigger forceRTL)
-                await setLanguage(selectedLanguage);
-
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
-
-                // In Expo Go (dev mode), show manual reload instructions immediately
-                // Don't try to restart as it won't work
-                if (__DEV__) {
-                  setShowModal(false);
-                  // Acknowledge the restart so the banner won't show on next JS reload
-                  await acknowledgeRestart();
-                  // Show instructions for manual reload
-                  Alert.alert(
-                    selectedLanguage === 'he' ? '\u05D4\u05D4\u05D2\u05D3\u05E8\u05D5\u05EA \u05E0\u05E9\u05DE\u05E8\u05D5!' : 'Settings Saved!',
-                    selectedLanguage === 'he'
-                      ? '\u05DB\u05D3\u05D9 \u05DC\u05D4\u05D7\u05D9\u05DC \u05D0\u05EA \u05DB\u05D9\u05D5\u05D5\u05DF \u05D4\u05D8\u05E7\u05E1\u05D8 (RTL):\n\n1. \u05E0\u05E2\u05E8 \u05D0\u05EA \u05D4\u05DE\u05DB\u05E9\u05D9\u05E8\n2. \u05DC\u05D7\u05E5 \u05E2\u05DC "Reload"\n\n\u05D0\u05D5 \u05DC\u05D7\u05E5 Cmd+R (iOS) / R+R (Android)'
-                      : 'To apply the text direction change (LTR):\n\n1. Shake your device\n2. Tap "Reload"\n\nOr press Cmd+R (iOS) / R+R (Android)',
-                    [{ text: 'OK', style: 'default' }]
-                  );
-                } else {
-                  // Production build - close modal and restart app
-                  setShowModal(false);
-
-                  // Small delay to ensure state is saved
-                  setTimeout(async () => {
-                    const restarted = await restartApp();
-
-                    // Fallback in case restart fails in production
-                    if (!restarted) {
-                      Alert.alert(
-                        selectedLanguage === 'he' ? '\u05E0\u05D3\u05E8\u05E9 \u05D4\u05E4\u05E2\u05DC\u05D4 \u05DE\u05D7\u05D3\u05E9' : 'Manual Restart Required',
-                        selectedLanguage === 'he'
-                          ? '\u05E1\u05D2\u05D5\u05E8 \u05D0\u05EA \u05D4\u05D0\u05E4\u05DC\u05D9\u05E7\u05E6\u05D9\u05D4 \u05D5\u05E4\u05EA\u05D7 \u05DE\u05D7\u05D3\u05E9 \u05DB\u05D3\u05D9 \u05DC\u05D4\u05D7\u05D9\u05DC \u05D0\u05EA \u05DB\u05D9\u05D5\u05D5\u05DF \u05D4\u05D8\u05E7\u05E1\u05D8.'
-                          : 'Please close and reopen the app to apply the text direction change.',
-                        [{ text: 'OK', style: 'default' }]
-                      );
-                    }
-                  }, 100);
-                }
-              } catch (error) {
-                console.error('Failed to change language:', error);
-                Alert.alert('Error', 'Failed to change language. Please try again.');
-              } finally {
-                setPendingLanguage(null);
-                setIsChanging(false);
-              }
-            },
-          },
-        ]
-      );
-    } else {
-      // No RTL change needed, just switch language
-      try {
-        await setLanguage(selectedLanguage);
-        if (Platform.OS !== 'web') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-        setShowModal(false);
-      } catch (error) {
-        console.error('Failed to change language:', error);
-      } finally {
-        setPendingLanguage(null);
-        setIsChanging(false);
-      }
-    }
+        },
+      ]
+    );
   };
 
   const buttonStyle = useAnimatedStyle(() => ({

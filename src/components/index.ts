@@ -1,3 +1,4 @@
+export { ActivePowersBanner } from './ActivePowersBanner';
 export { Avatar } from './Avatar';
 export { Button } from './Button';
 export { Card } from './Card';
@@ -40,6 +41,53 @@ export {
 export { RivalryBadge } from './RivalryBadge';
 export { RivalryPanel } from './RivalryPanel';
 export { RivalryDeclarationModal } from './RivalryDeclarationModal';
+
+// Currency Components (Stars System)
+export {
+  StarsBadge,
+  StarsAnimation,
+  useStarsAnimation,
+} from './currency';
+
+// Rewards Components (Chest System)
+export {
+  RewardSlot,
+  RewardClaimModal,
+} from './rewards';
+
+// Progress Components (Account Progress UI)
+export {
+  PowerUpCard,
+  AbilityCard,
+  AddCompetitionButton,
+  ProgressSection,
+} from './progress';
+
+// Player Status Indicators (Insurance, Comeback, Pressure)
+export {
+  StatusTooltip,
+  InlineTooltip,
+  ParticipationInsurance,
+  InsuranceIndicator,
+  ComebackBoost,
+  ComebackIndicator,
+  LeaderPressure,
+  PressureIndicator,
+  PlayerStatusBadges,
+  InlineStatusBadges,
+  usePlayerStatusData,
+} from './status';
+
+// Judge Role System Components
+export {
+  JudgeIndicator,
+  JudgeBonusPenalty,
+  JudgeBonusBadge,
+  OverturnedMarker,
+  ChallengeVoteButton,
+  ChallengeVoteButtons,
+  ChallengeWindow,
+} from './judge';
 
 // Effects components
 export {
@@ -85,3 +133,37 @@ export type { UnderdogPowerType } from './UnderdogPowerBadge';
 export type { CrownBadgeProps, CrownOverlayProps } from './CrownBadge';
 export type { HeadlineBannerProps } from './HeadlineBanner';
 export type { HeadlineInputModalProps } from './HeadlineInputModal';
+export type { StarsBadgeProps, StarsAnimationProps } from './currency';
+export type { RewardSlotProps, RewardClaimModalProps } from './rewards';
+export type {
+  PowerUpCardProps,
+  AbilityCardProps,
+  AbilityStatus,
+  AddCompetitionButtonProps,
+  ProgressSectionProps,
+  ProgressItem,
+  ProgressItemType,
+  PowerUpItem,
+  AbilityItem,
+} from './progress';
+export type {
+  StatusTooltipProps,
+  InlineTooltipProps,
+  ParticipationInsuranceProps,
+  ComebackBoostProps,
+  LeaderPressureProps,
+  PressureLevel,
+  PlayerStatusBadgesProps,
+  InsuranceStatus,
+  ComebackStatus,
+  PressureStatus,
+} from './status';
+export type {
+  JudgeIndicatorProps,
+  JudgeBonusPenaltyProps,
+  JudgeBonusBadgeProps,
+  ChallengeVoteButtonProps,
+  ChallengeVoteButtonsProps,
+  ChallengeWindowProps,
+  ChallengeData,
+} from './judge';

@@ -35,7 +35,8 @@
     "leaderboard": "דירוג",
     "profile": "פרופיל",
     "settings": "הגדרות",
-    "today": "היום"
+    "today": "היום",
+    "shop": "חנות"
   },
   "gameElements": {
     "squad": "סקווד",
@@ -758,5 +759,411 @@
   },
   "badges": {
     "rival": "יריב"
+  },
+  "currency": {
+    "stars": "כוכבים",
+    "star": "כוכב",
+    "balance": "יתרה",
+    "earn": "הרווח",
+    "spend": "הוצא",
+    "insufficient": "אין מספיק כוכבים",
+    "transaction": "עסקה",
+    "history": "היסטוריה",
+    "sources": {
+      "daily_login": "כניסה יומית",
+      "event_participation": "השתתפות באתגר",
+      "event_win": "ניצחון באתגר",
+      "event_top_3": "3 הראשונים באתגר",
+      "mini_game": "ניקוד במשחקון",
+      "streak_bonus": "בונוס רצף",
+      "purchase": "רכישה",
+      "shop_purchase": "רכישה בחנות",
+      "reward_slot": "תיבת פרסים",
+      "achievement": "הישג",
+      "gift": "מתנה"
+    },
+    "dailyLogin": {
+      "title": "בונוס יומי",
+      "claimed": "נדרש!",
+      "day": "יום {{day}}",
+      "streak": "רצף: {{count}} ימים",
+      "bonus": "+{{amount}} כוכבים"
+    }
+  },
+  "shop": {
+    "title": "חנות",
+    "featured": "מומלצים",
+    "categories": {
+      "all": "הכל",
+      "avatar_frame": "מסגרות",
+      "theme": "ערכות נושא",
+      "wild_card": "קלפים פראיים",
+      "power_boost": "הגברות כוח",
+      "headline_pack": "חבילות כותרות",
+      "consumable": "פריטים צורכים"
+    },
+    "rarity": {
+      "common": "נפוץ",
+      "uncommon": "יחסית נדיר",
+      "rare": "נדיר",
+      "epic": "אפי",
+      "legendary": "אגדי"
+    },
+    "purchase": "רכוש",
+    "purchased": "נרכש",
+    "owned": "בבעלותך",
+    "equipped": "מצויד",
+    "equip": "ציוד",
+    "unequip": "הסר",
+    "price": "מחיר",
+    "limitedTime": "מוגבל בזמן",
+    "sale": "מבצע",
+    "new": "חדש",
+    "popular": "פופולרי",
+    "outOfStock": "אזל מהמלאי",
+    "confirmPurchase": "אישור רכישה",
+    "purchaseSuccess": "רכישה הצליחה!",
+    "purchaseFailed": "רכישה נכשלה",
+    "notEnoughStars": "אין מספיק כוכבים",
+    "getMoreStars": "קבל עוד כוכבים",
+    "yourBalance": "היתרה שלך",
+    "itemDetails": "פרטי הפריט",
+    "quantity": "כמות"
+  },
+  "rewards": {
+    "slots": {
+      "title": "תיבות פרסים",
+      "slot": "תיבה {{index}}",
+      "empty": "ריק",
+      "filling": "ממלאת",
+      "ready": "מוכנה!",
+      "unlocking": "נפתחת",
+      "claim": "דרוש",
+      "open": "פתח",
+      "progress": "{{current}}/{{required}}",
+      "timeRemaining": "נותרו {{time}}",
+      "tapToOpen": "הקש לפתיחה",
+      "unlockNow": "פתח עכשיו",
+      "skipWait": "דלג על המתנה"
+    },
+    "claim": {
+      "title": "פרס חדש!",
+      "congratulations": "מזל טוב!",
+      "youReceived": "קיבלת",
+      "stars": "{{amount}} כוכבים",
+      "wildCard": "קלף פראי",
+      "item": "פריט",
+      "continue": "המשך"
+    },
+    "rarity": {
+      "common": "נפוץ",
+      "rare": "נדיר",
+      "epic": "אפי",
+      "legendary": "אגדי"
+    }
+  },
+  "wildCards": {
+    "title": "קלפים פראיים",
+    "yourCards": "הקלפים שלך",
+    "noCards": "אין קלפים פראיים",
+    "use": "השתמש",
+    "active": "פעיל",
+    "expired": "פג תוקף",
+    "usesRemaining": "{{count}} שימושים נותרו",
+    "types": {
+      "skip_turn": {
+        "name": "דלג על תור",
+        "description": "דלג על אתגר אחד בלי לאבד את הרצף"
+      },
+      "double_xp": {
+        "name": "XP כפול",
+        "description": "הרווח XP כפול באתגר הבא"
+      },
+      "steal_points": {
+        "name": "גנוב נקודות",
+        "description": "גנוב 10% מנקודות המוביל"
+      },
+      "revenge": {
+        "name": "נקמה",
+        "description": "הכפל את הנקודות נגד יריב"
+      },
+      "time_extend": {
+        "name": "הארכת זמן",
+        "description": "קבל 30 שניות נוספות באתגר"
+      },
+      "peek_answers": {
+        "name": "הצצה לתשובות",
+        "description": "ראה רמז לתשובה הנכונה"
+      }
+    }
+  },
+  "home": {
+    "noChallengeToday": "אין אתגר היום",
+    "checkBackLater": "חזור מאוחר יותר לקרב הבא!",
+    "endsIn": "מסתיים בעוד",
+    "startsIn": "מתחיל בעוד",
+    "playNow": "שחק עכשיו",
+    "live": "פעיל",
+    "upcoming": "בקרוב",
+    "completed": "הושלם",
+    "viewResults": "צפה בתוצאות",
+    "dayStreak": "רצף של {{count}} ימים!",
+    "squadMembersPlayed": "{{submitted}}/{{total}} חברי סקווד שיחקו",
+    "hrs": "שעות",
+    "min": "דק'",
+    "sec": "שנ'",
+    "expired": "פג תוקף",
+    "remaining": "נותרו",
+    "predictionTime": "זמן ניחוש",
+    "selfieChallenge": "אתגר סלפי",
+    "pressureTap": "הקשה בלחץ",
+    "xpReward": "+{{amount}} XP",
+    "earnXP": "הרווח XP",
+    "xpToLevel": "XP לרמה {{level}}",
+    "level": "רמה {{level}}",
+    "totalXP": "סה\"כ XP",
+    "rank": "דירוג",
+    "streak": "רצף",
+    "joinSquadToPlay": "הצטרף לסקווד כדי לשחק!",
+    "dailyChallengesRequireSquad": "אתגרים יומיים דורשים סקווד. צור או הצטרף לאחד כדי להתחרות עם חברים!",
+    "findYourSquad": "מצא את הסקווד שלך",
+    "missedChallenge": "פספסת את האתגר הזה",
+    "comebackStartsNow": "הקאמבק מתחיל עכשיו!",
+    "growYourSquad": "גדל את הסקווד שלך!",
+    "judgeToday": "אתה השופט היום!",
+    "defaultPlayerName": "שחקן",
+    "inviteFriends": "הזמן חברים",
+    "playEvent": "שחק אתגר",
+    "playGames": "משחקונים",
+    "eventBanner": {
+      "nextEvent": "האתגר הבא",
+      "liveNow": "פעיל עכשיו!",
+      "opensIn": "נפתח בעוד"
+    },
+    "sideBubbles": {
+      "crownHolder": "נושא הכתר",
+      "underdog": "אנדרדוג",
+      "wildCard": "קלף פראי",
+      "activePower": "כוח פעיל",
+      "targetLock": "נעילת מטרה"
+    },
+    "levelTitles": {
+      "newbie": "מתחיל",
+      "rookie": "טירון",
+      "risingStar": "כוכב עולה",
+      "competitor": "מתחרה",
+      "challengeSeeker": "מחפש אתגרים",
+      "squadVeteran": "ותיק הסקווד",
+      "elitePlayer": "שחקן עילית",
+      "squadLegend": "אגדת סקווד",
+      "hallOfFamer": "היכל התהילה",
+      "mythicLegend": "אגדה מיתית"
+    }
+  },
+  "gameInfo": {
+    "title": "מידע על המשחק",
+    "rulebook": "ספר החוקים",
+    "rulebookDesc": "כוחות, תפקידים ואיך לשחק",
+    "judgeRole": "תפקיד השופט",
+    "judgeRoleDesc": "כוחות השופט היומי"
+  },
+  "rulebook": {
+    "title": "ספר החוקים",
+    "header": "ספר החוקים של הסקווד",
+    "disclaimer": "זה משחק בין חברים. שחקו הוגן, תהנו!",
+    "searchPowers": "חפש כוחות...",
+    "tabs": {
+      "powers": "כוחות",
+      "rules": "חוקים",
+      "history": "היסטוריה"
+    },
+    "coreRules": "חוקי יסוד",
+    "powers": "כוחות",
+    "powersDescription": "יכולות מיוחדות שתוכל להרוויח ולהשתמש",
+    "howToEarn": "איך להרוויח",
+    "duration": "משך זמן",
+    "limits": "הגבלות",
+    "cancel": "איך לבטל",
+    "expiration": "תפוגה",
+    "whoCanActivate": "מי יכול להפעיל",
+    "powerHistory": "היסטוריית כוחות",
+    "noPowerHistory": "עדיין לא נעשה שימוש בכוחות",
+    "activePowers": "כוחות פעילים",
+    "availablePowers": "כוחות זמינים",
+    "usedPowers": "כוחות שהופעלו",
+    "activationConditions": "תנאי הפעלה",
+    "locked": "נעול",
+    "unlocked": "פתוח",
+    "howToUnlock": "איך לפתוח",
+    "noPowersFound": "לא נמצאו כוחות",
+    "tryAdjusting": "נסה לשנות את החיפוש או הסינון",
+    "gamePhilosophy": "פילוסופיית המשחק",
+    "philosophySubtitle": "אלו העקרונות הבסיסיים שהופכים את Squad Game להוגן, כיפי ומשמעותי.",
+    "fairPlayGuarantee": "ערבות למשחק הוגן",
+    "fairPlayDesc": "כל הכוחות מעוצבים להיות מאוזנים. אף כוח לא יכול לשלוט במשחק. אסטרטגיה והשתתפות תמיד מנצחים את המזל.",
+    "livingRules": "חוקים חיים",
+    "livingRulesDesc": "ספר החוקים הזה מתפתח עם הסקווד שלך. כוחות חדשים עשויים להתווסף ותיקוני איזון יבוצעו בהתאם למשחק.",
+    "squadDemocracy": "דמוקרטיית הסקווד",
+    "squadDemocracyDesc": "כוחות שמשנים את המשחק דורשים אישור מהסקווד. אף שחקן לא יכול לשנות חד צדדית את החוויה לכולם.",
+    "quote": "המשחקים הטובים ביותר הם אלה שכולם רוצים לחזור אליהם מחר.",
+    "quoteAuthor": "- פילוסופיית Squad Game",
+    "categories": {
+      "all": "הכל",
+      "attack": "התקפה",
+      "attackDesc": "כוחות שמכוונים לשחקנים אחרים",
+      "defense": "הגנה",
+      "defenseDesc": "כוחות שמגנים עליך",
+      "social": "חברתי",
+      "socialDesc": "כוחות שמשפיעים על דינמיקת הקבוצה",
+      "special": "מיוחד",
+      "specialDesc": "אפקטים ייחודיים לכל הסקווד"
+    },
+    "coreRulesList": {
+      "temporary": "כוחות הם זמניים",
+      "temporaryDesc": "אף כוח לא נמשך לנצח. לכל כוח יש משך ותפוגה ברורים.",
+      "visible": "כוחות גלויים",
+      "visibleDesc": "אין כוחות סודיים. כשאתה מפעיל כוח, הסקווד רואה.",
+      "earned": "כוחות נרכשים",
+      "earnedDesc": "השתתף באופן עקבי ותפתח כוחות. המשחק מתגמל מעורבות.",
+      "absence": "היעדרות לא נותנת כלום",
+      "absenceDesc": "אי אפשר להרוויח כוחות בלי להשתתף. חוסר פעילות מוחק את המעמד שלך.",
+      "influence": "השפעה מעל עונש",
+      "influenceDesc": "כוחות שעוזרים לך להצליח עדיפים על כוחות שפוגעים באחרים."
+    }
+  },
+  "powers": {
+    "doubleChance": {
+      "name": "הזדמנות כפולה",
+      "short": "קבל שני ניסיונות באתגר הבא.",
+      "full": "כשמופעל, אתה מקבל שני ניסיונות באתגר הבא במקום אחד. רק התוצאה הטובה ביותר נספרת לציון הסופי. הכוח הזה מושלם לרגעים קריטיים כשאתה צריך ביטוח מפני ניסיון גרוע.",
+      "duration": "שימוש חד פעמי - פג תוקף אחרי אתגר אחד",
+      "limits": "הזדמנות כפולה אחת לאתגר לשחקן",
+      "howToCancel": "לא ניתן לבטל ברגע שהאתגר מתחיל. לפני תחילת האתגר, הקש על תג הכוח לביטול.",
+      "expirationRules": "פג תוקף 24 שעות לאחר הענקה אם לא נעשה שימוש. גם פג תוקף אם לא מתקיימים אתגרים בחלון הזמן.",
+      "unlockCondition": "סיים ב-3 התחתונים בטבלה השבועית",
+      "activationConditions": ["חייב להיות מופעל לפני תחילת אתגר", "לא ניתן להשתמש באתגרים שכבר הושלמו", "חייב להרוויח את הכוח דרך השתתפות"]
+    },
+    "targetLock": {
+      "name": "נעילת מטרה",
+      "short": "סמן שחקן אחד כמטרה שלך.",
+      "full": "בחר שחקן אחד לנעול עליו. השחקן יראה אינדיקטור גלוי שהוא מותקף. אם תנצח את הציון שלו באתגר הבא, אתה גונב XP בונוס ממנו. יוצר לחץ פסיכולוגי ודינמיקת יריבות.",
+      "duration": "נמשך מחזור אתגר אחד",
+      "limits": "אפשר לנעול רק על שחקן אחד בכל פעם. ברגע שננעל, לא ניתן לשנות מטרה עד סיום האתגר.",
+      "howToCancel": "ניתן לשנות מטרה לפני תחילת האתגר. ברגע שהאתגר מתחיל, המטרה ננעלת.",
+      "expirationRules": "פג תוקף כשהאתגר מסתיים. אם ניצחת את המטרה, מקבל +50 XP בונוס. אם הם ניצחו אותך, הם מקבלים +25 XP.",
+      "unlockCondition": "השתתף 3 ימים רצופים",
+      "activationConditions": ["חייב לבחור מטרה לפני תחילת האתגר", "המטרה חייבת להיות באותו סקווד", "לא ניתן לנעול על עצמך או על אותו אדם פעמיים ברציפות"]
+    },
+    "chaosCard": {
+      "name": "קלף כאוס",
+      "short": "הפעל שינוי חוקים מפתיע.",
+      "full": "משוך שינוי חוקים אקראי שמשפיע על האתגר הבא לכל השחקנים בסקווד שלך. קלפי כאוס יכולים להפוך את המשחק - להפוך ציונים, להוסיף לחץ זמן, או לשנות תנאי ניצחון. סיכון גבוה, תגמול גבוה.",
+      "duration": "משפיע על כל משך האתגר",
+      "limits": "רק קלף כאוס אחד יכול להיות פעיל לאתגר. נדרשת הצבעת סקווד.",
+      "howToCancel": "ניתן לערער על ידי 3+ חברי סקווד תוך 2 דקות מההפעלה. אם מערערים, מתקיימת הצבעה.",
+      "expirationRules": "האפקט נגמר כשהאתגר מסתיים. חלק מאפקטי הכאוס עשויים להימשך לשלב התוצאות.",
+      "unlockCondition": "החזק את הכתר או שמור על רצף של 7+ ימים",
+      "activationConditions": ["חייב להיות מופעל בספירה לאחור לאתגר (10 דקות לפני)", "דורש אישור מלפחות 2 חברי סקווד", "לא ניתן לשלב עם קלפי כאוס אחרים"]
+    },
+    "streakShield": {
+      "name": "מגן רצף",
+      "short": "הגן על הרצף שלך אם תפספס אתגר.",
+      "full": "החיים קורים. מגן הרצף מופעל אוטומטית כדי להציל את רצף ההשתתפות שלך אם תפספס אתגר. מונה הרצף שלך נשאר שלם, אבל לא מקבל נקודות על האתגר הזה. השתמש בחוכמה - מגנים נרכשים, לא ניתנים.",
+      "duration": "מיידי - מגן על אתגר אחד שפוספס",
+      "limits": "מקסימום מגן אחד לשבוע. לא ניתן לצבור מספר מגנים.",
+      "howToCancel": "לא ניתן לבטל. ברגע שמופעל, הוא נצרך.",
+      "expirationRules": "המגן פג תוקף לא בשימוש אחרי 7 ימים. אם לא נדרש בחלון הזמן הזה, מאבדים אותו.",
+      "unlockCondition": "הגע לרצף השתתפות של 5 ימים",
+      "activationConditions": ["מופעל אוטומטית כשמפספסים אתגר", "חייב להיות רצף פעיל של 5+ ימים", "לא ניתן להפעיל ידנית"]
+    },
+    "active": "פעיל",
+    "expired": "פג תוקף",
+    "used": "הופעל",
+    "available": "זמין",
+    "activateNow": "הפעל עכשיו",
+    "expiresIn": "פג תוקף בעוד {{time}}",
+    "powersActive": "{{count}} כוחות פעילים"
+  },
+  "judge": {
+    "title": "שופט",
+    "youAreJudge": "אתה השופט היום!",
+    "todaysJudge": "השופט של היום",
+    "judgeRole": "תפקיד השופט",
+    "judgePowers": "כוחות השופט",
+    "judgeBonus": "בונוס שופט",
+    "judgePenalty": "עונש שופט",
+    "bonusEarned": "+{{amount}} נקודות בונוס",
+    "penaltyApplied": "-{{amount}} עונש",
+    "overturned": "הופך",
+    "challengeDecision": "ערער על ההחלטה",
+    "challengeActive": "ערעור פעיל",
+    "voteFor": "הצבע בעד",
+    "voteAgainst": "הצבע נגד",
+    "votesNeeded": "{{current}}/{{needed}} הצבעות נדרשות",
+    "challengeExpires": "פג תוקף בעוד {{time}}",
+    "challengePassed": "הערעור עבר",
+    "challengeFailed": "הערעור נכשל",
+    "noChallenges": "אין ערעורים פעילים",
+    "description": "לשופט יש כוחות מיוחדים באתגר של היום. הסקווד יכול לערער על ההחלטות שלו."
+  },
+  "playerStatus": {
+    "insurance": {
+      "title": "ביטוח השתתפות",
+      "active": "ביטוח פעיל",
+      "description": "ההשתתפות העקבית שלך מזכה אותך בפרסי מינימום גם אם לא תנצח.",
+      "minReward": "מובטחות לפחות {{amount}} נקודות"
+    },
+    "comeback": {
+      "title": "בוסט קאמבק",
+      "active": "קאמבק פעיל",
+      "description": "נאבקת לאחרונה. הרווח {{multiplier}} כפול נקודות ל-{{hours}} השעות הבאות!",
+      "expiresIn": "פג תוקף בעוד {{time}}"
+    },
+    "pressure": {
+      "title": "לחץ על המוביל",
+      "active": "תחת לחץ",
+      "description": "אתה מוביל! כולם צופים. אל תחליק!",
+      "levels": {
+        "low": "לחץ קל",
+        "medium": "לחץ בינוני",
+        "high": "לחץ אינטנסיבי"
+      }
+    }
+  },
+  "eventPowers": {
+    "activePowersTitle": "הכוחות הפעילים שלך",
+    "noPowersActive": "אין כוחות פעילים",
+    "powerWillApply": "כוח זה יחול על האתגר הזה",
+    "tapToActivate": "הקש להפעלה לפני תחילת האתגר",
+    "activeForEvent": "פעיל לאתגר זה"
+  },
+  "events": {
+    "pressureTap": {
+      "title": "לחץ והקש",
+      "subtitle": "הקש מהר ככל האפשר ב-10 שניות!",
+      "tapHere": "הקש כאן!"
+    },
+    "stats": {
+      "yourBest": "השיא שלך",
+      "squadBest": "שיא הקבוצה",
+      "taps": "הקשות",
+      "tapsLabel": "הקשות"
+    },
+    "countdown": {
+      "go": "!התחל"
+    },
+    "result": {
+      "timesUp": "!נגמר הזמן",
+      "newPersonalBest": "!שיא אישי חדש",
+      "xpEarned": "נקודות ניסיון",
+      "squadRank": "דירוג בקבוצה",
+      "moreToBeat": "עוד {{count}} לשבור את השיא שלך!"
+    },
+    "actions": {
+      "startGame": "התחל משחק",
+      "submitScore": "שלח תוצאה",
+      "submitting": "שולח...",
+      "tryAgain": "נסה שוב"
+    }
   }
 }

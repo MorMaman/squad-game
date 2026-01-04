@@ -224,3 +224,9 @@ export * from './powers';
 
 // Re-export crown types
 export * from './crown';
+
+// Re-export judge system types
+export * from './judge';
+
+// Re-export player status types
+export * from './playerStatus';

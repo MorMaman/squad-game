@@ -13,7 +13,9 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../../src/components/Button';
+import { ActivePowersBanner } from '../../src/components/ActivePowersBanner';
 import {
   Confetti,
   SparkleEffect,
@@ -23,6 +25,8 @@ import {
   PulsingGlow,
 } from '../../src/components/effects';
 import { useEventStore } from '../../src/store/eventStore';
+import { usePowerStore } from '../../src/store/powerStore';
+import { PowerType } from '../../src/types/powers';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -48,6 +52,7 @@ const MILESTONE_INTERVAL = 10; // Special feedback every 10 taps
 
 export default function PressureTapScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>('ready');
   const [tapCount, setTapCount] = useState(0);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -56,6 +61,10 @@ export default function PressureTapScreen() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const { todayEvent, submitEvent } = useEventStore();
+  const { activePowers } = usePowerStore();
+
+  // Get current user's active powers for this event
+  const myActivePowers = activePowers.filter(p => p.used_at === null && new Date(p.expires_at) > new Date());
 
   // Floating XP hook
   const { instances: xpInstances, showXP, removeInstance } = useFloatingXP();
@@ -464,6 +473,16 @@ export default function PressureTapScreen() {
         {/* READY PHASE */}
         {phase === 'ready' && (
           <View style={styles.readyContainer}>
+            {/* Active Powers Banner */}
+            {myActivePowers.length > 0 && (
+              <ActivePowersBanner
+                activePowers={myActivePowers.map(p => ({
+                  type: p.power_type,
+                  expiresAt: p.expires_at,
+                }))}
+              />
+            )}
+
             <View style={styles.readyIconContainer}>
               <SparkleEffect active intensity="medium">
                 <LinearGradient
@@ -477,9 +496,9 @@ export default function PressureTapScreen() {
               </SparkleEffect>
             </View>
 
-            <Text style={styles.readyTitle}>PRESSURE TAP</Text>
+            <Text style={styles.readyTitle}>{t('events.pressureTap.title', 'PRESSURE TAP')}</Text>
             <Text style={styles.readySubtitle}>
-              Tap as fast as you can for 10 seconds!
+              {t('events.pressureTap.subtitle', 'Tap as fast as you can for 10 seconds!')}
             </Text>
 
             <View style={styles.statsContainer}>
@@ -488,8 +507,8 @@ export default function PressureTapScreen() {
                   <View style={styles.statIconContainer}>
                     <Ionicons name="trophy" size={20} color={COLORS.energy} />
                   </View>
-                  <Text style={styles.statLabel}>Your Best</Text>
-                  <Text style={styles.statValue}>{personalBest} taps</Text>
+                  <Text style={styles.statLabel}>{t('events.stats.yourBest', 'Your Best')}</Text>
+                  <Text style={styles.statValue}>{personalBest} {t('events.stats.taps', 'taps')}</Text>
                 </View>
               </SparkleEffect>
 
@@ -497,7 +516,7 @@ export default function PressureTapScreen() {
                 <View style={styles.statIconContainer}>
                   <Ionicons name="ribbon" size={20} color={COLORS.secondary} />
                 </View>
-                <Text style={styles.statLabel}>Squad Best</Text>
+                <Text style={styles.statLabel}>{t('events.stats.squadBest', 'Squad Best')}</Text>
                 <Text style={styles.statValue}>
                   @{squadBest.name}: {squadBest.score}
                 </Text>
@@ -513,7 +532,7 @@ export default function PressureTapScreen() {
                   end={{ x: 1, y: 0 }}
                 >
                   <Ionicons name="play" size={28} color="#fff" />
-                  <Text style={styles.startButtonText}>START GAME</Text>
+                  <Text style={styles.startButtonText}>{t('events.actions.startGame', 'START GAME')}</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </PulsingGlow>
@@ -533,7 +552,7 @@ export default function PressureTapScreen() {
               ]}
             >
               <Text style={styles.countdownText}>
-                {countdownValue === 0 ? 'GO!' : countdownValue}
+                {countdownValue === 0 ? t('events.countdown.go', 'GO!') : countdownValue}
               </Text>
             </Animated.View>
           </View>
@@ -577,7 +596,7 @@ export default function PressureTapScreen() {
               ]}
             >
               <Text style={styles.tapCounter}>{tapCount}</Text>
-              <Text style={styles.tapCounterLabel}>TAPS</Text>
+              <Text style={styles.tapCounterLabel}>{t('events.stats.tapsLabel', 'TAPS')}</Text>
             </Animated.View>
 
             {/* Milestone text */}
@@ -633,7 +652,7 @@ export default function PressureTapScreen() {
                 >
                   <View style={styles.tapZoneInner}>
                     <Ionicons name="finger-print" size={64} color={COLORS.textPrimary} />
-                    <Text style={styles.tapZoneText}>TAP HERE!</Text>
+                    <Text style={styles.tapZoneText}>{t('events.pressureTap.tapHere', 'TAP HERE!')}</Text>
                   </View>
                 </LinearGradient>
               </TouchableOpacity>
@@ -671,26 +690,26 @@ export default function PressureTapScreen() {
                     <Ionicons name="flash" size={40} color="#fff" />
                   </LinearGradient>
                 </SparkleEffect>
-                <Text style={styles.resultTitle}>TIME'S UP!</Text>
+                <Text style={styles.resultTitle}>{t('events.result.timesUp', "TIME'S UP!")}</Text>
               </View>
 
               <View style={styles.resultScoreContainer}>
                 <Text style={styles.resultScoreNumber}>{tapCount}</Text>
-                <Text style={styles.resultScoreLabel}>TAPS</Text>
+                <Text style={styles.resultScoreLabel}>{t('events.stats.tapsLabel', 'TAPS')}</Text>
               </View>
 
               {isNewPersonalBest && (
                 <SparkleEffect active intensity="high">
                   <View style={styles.personalBestBadge}>
                     <Ionicons name="trophy" size={20} color={COLORS.energy} />
-                    <Text style={styles.personalBestText}>NEW PERSONAL BEST!</Text>
+                    <Text style={styles.personalBestText}>{t('events.result.newPersonalBest', 'NEW PERSONAL BEST!')}</Text>
                   </View>
                 </SparkleEffect>
               )}
 
               <View style={styles.resultStatsRow}>
                 <View style={styles.resultStat}>
-                  <Text style={styles.resultStatLabel}>XP Earned</Text>
+                  <Text style={styles.resultStatLabel}>{t('events.result.xpEarned', 'XP Earned')}</Text>
                   <SparkleEffect active={calculateXP() >= 75} intensity="medium">
                     <View style={styles.resultStatValueRow}>
                       <Ionicons name="star" size={20} color={COLORS.energy} />
@@ -700,7 +719,7 @@ export default function PressureTapScreen() {
                 </View>
                 <View style={styles.resultStatDivider} />
                 <View style={styles.resultStat}>
-                  <Text style={styles.resultStatLabel}>Squad Rank</Text>
+                  <Text style={styles.resultStatLabel}>{t('events.result.squadRank', 'Squad Rank')}</Text>
                   <View style={styles.resultStatValueRow}>
                     <Ionicons name="podium" size={20} color={COLORS.primary} />
                     <Text style={styles.resultStatValue}>#{getRank()}</Text>
@@ -710,12 +729,12 @@ export default function PressureTapScreen() {
 
               {tapCount < personalBest && (
                 <Text style={styles.resultEncouragement}>
-                  {personalBest - tapCount} more to beat your best!
+                  {t('events.result.moreToBeat', '{{count}} more to beat your best!', { count: personalBest - tapCount })}
                 </Text>
               )}
 
               <Button
-                title={phase === 'submitting' ? 'Submitting...' : 'SUBMIT SCORE'}
+                title={phase === 'submitting' ? t('events.actions.submitting', 'Submitting...') : t('events.actions.submitScore', 'SUBMIT SCORE')}
                 onPress={handleSubmit}
                 loading={phase === 'submitting'}
                 size="large"
@@ -727,7 +746,7 @@ export default function PressureTapScreen() {
                 onPress={handleStartGame}
                 disabled={phase === 'submitting'}
               >
-                <Text style={styles.playAgainText}>Try Again</Text>
+                <Text style={styles.playAgainText}>{t('events.actions.tryAgain', 'Try Again')}</Text>
               </TouchableOpacity>
             </Animated.View>
           </View>
