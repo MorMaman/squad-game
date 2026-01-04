@@ -1,6 +1,19 @@
 const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
 
 const config = getDefaultConfig(__dirname);
+
+// Fix for react-native-worklets on web (uses import.meta which breaks)
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform === 'web' && moduleName === 'react-native-worklets') {
+    return {
+      filePath: path.resolve(__dirname, 'src/mocks/react-native-worklets.web.ts'),
+      type: 'sourceFile',
+    };
+  }
+  // Fall back to default resolution
+  return context.resolveRequest(context, moduleName, platform);
+};
 
 // Production optimizations
 if (process.env.NODE_ENV === 'production') {
